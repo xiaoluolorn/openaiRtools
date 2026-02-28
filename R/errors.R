@@ -89,12 +89,13 @@ handle_response <- function(resp) {
 handle_stream_response <- function(req) {
   chunks <- list()
   
-  # Perform streaming request
-  httr2::req_perform(
+  # Perform streaming request using httr2's streaming API
+  resp <- httr2::req_perform_stream(
     req,
-    stream = function(chunk) {
+    callback = function(chunk) {
       if (length(chunk) > 0) {
-        lines <- strsplit(rawToChar(chunk, multiple = TRUE), "\n")[[1]]
+        text <- rawToChar(chunk)
+        lines <- strsplit(text, "\n")[[1]]
         
         for (line in lines) {
           # Skip empty lines
@@ -106,7 +107,7 @@ handle_stream_response <- function(req) {
             
             # Check for end of stream
             if (trimws(data_str) == "[DONE]") {
-              return(FALSE)  # Stop streaming
+              return(invisible(FALSE))  # Stop streaming
             }
             
             # Parse JSON
@@ -122,7 +123,7 @@ handle_stream_response <- function(req) {
           }
         }
       }
-      TRUE  # Continue streaming
+      invisible(TRUE)  # Continue streaming
     }
   )
   
