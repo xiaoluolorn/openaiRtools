@@ -80,3 +80,52 @@ handle_response <- function(resp) {
   # Parse JSON response
   jsonlite::fromJSON(rawToChar(resp$body), simplifyVector = FALSE)
 }
+
+#' Handle streaming response from OpenAI API
+#'
+#' @param req httr2 request object
+#' @return List of parsed SSE data chunks
+#' @keywords internal
+handle_stream_response <- function(req) {
+  chunks <- list()
+  
+  # Perform streaming request
+  httr2::req_perform(
+    req,
+    stream = function(chunk) {
+      if (length(chunk) > 0) {
+        lines <- strsplit(rawToChar(chunk, multiple = TRUE), "\n")[[1]]
+        
+        for (line in lines) {
+          # Skip empty lines
+          if (trimws(line) == "") next
+          
+          # Parse SSE data lines
+          if (startsWith(line, "data: ")) {
+            data_str <- substring(line, 7)
+            
+            # Check for end of stream
+            if (trimws(data_str) == "[DONE]") {
+              return(FALSE)  # Stop streaming
+            }
+            
+            # Parse JSON
+            tryCatch(
+              {
+                data_json <- jsonlite::fromJSON(data_str, simplifyVector = FALSE)
+                chunks[[length(chunks) + 1]] <<- data_json
+              },
+              error = function(e) {
+                # Skip invalid JSON
+              }
+            )
+          }
+        }
+      }
+      TRUE  # Continue streaming
+    }
+  )
+  
+  # Return collected chunks
+  chunks
+}

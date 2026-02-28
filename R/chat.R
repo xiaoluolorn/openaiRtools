@@ -57,8 +57,30 @@ ChatCompletionsClient <- R6::R6Class(
     #' @param tools List of tools available
     #' @param tool_choice Tool choice strategy
     #' @param user Unique identifier for end user
+    #' @param callback Function to call for each stream chunk (only for streaming)
     #' @param ... Additional parameters
-    #' @return Chat completion response
+    #' @return Chat completion response or list of stream chunks
+    #'
+    #' @examples
+    #' \dontrun{
+    #' # Non-streaming
+    #' response <- client$chat$completions$create(
+    #'   messages = list(list(role = "user", content = "Hello")),
+    #'   model = "gpt-3.5-turbo"
+    #' )
+    #' cat(response$choices[[1]]$message$content)
+    #'
+    #' # Streaming with callback
+    #' client$chat$completions$create(
+    #'   messages = list(list(role = "user", content = "Tell me a story")),
+    #'   model = "gpt-3.5-turbo",
+    #'   stream = TRUE,
+    #'   callback = function(chunk) {
+    #'     content <- chunk$choices[[1]]$delta$content
+    #'     if (!is.null(content)) cat(content)
+    #'   }
+    #' )
+    #' }
     create = function(messages, model = "gpt-3.5-turbo",
                       frequency_penalty = NULL,
                       logit_bias = NULL,
@@ -77,6 +99,7 @@ ChatCompletionsClient <- R6::R6Class(
                       tools = NULL,
                       tool_choice = NULL,
                       user = NULL,
+                      callback = NULL,
                       ...) {
       body <- list(
         messages = messages,
@@ -108,7 +131,17 @@ ChatCompletionsClient <- R6::R6Class(
         body <- c(body, dots)
       }
       
-      self$client$request("POST", "/chat/completions", body = body)
+      result <- self$client$request("POST", "/chat/completions", body = body, stream = !is.null(stream) && stream)
+      
+      # Process streaming results if callback provided
+      if (!is.null(callback) && is.list(result)) {
+        for (chunk in result) {
+          callback(chunk)
+        }
+        return(invisible(result))
+      }
+      
+      result
     }
   )
 )

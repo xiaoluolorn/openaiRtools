@@ -83,12 +83,13 @@ OpenAI <- R6Class(
     
     #' Make HTTP request to OpenAI API
     #'
-    #' @param method HTTP method
-    #' @param path API path
-    #' @param body Request body (list)
-    #' @param query Query parameters (list)
-    #' @param stream Whether to stream response
-    #' @return HTTP response
+    #' @param method HTTP method (GET, POST, DELETE)
+    #' @param path API path (e.g., "/chat/completions")
+    #' @param body Request body (list). Optional.
+    #' @param query Query parameters (list). Optional.
+    #' @param stream Whether to stream response. Default: FALSE
+    #' @return Parsed JSON response or stream callback
+    #' @keywords internal
     request = function(method, path, body = NULL, query = NULL, stream = FALSE) {
       url <- paste0(self$base_url, path)
       
@@ -101,10 +102,40 @@ OpenAI <- R6Class(
         ) |>
         httr2::req_timeout(self$timeout)
       
-      # Add organization header if present
       if (!is.null(self$organization)) {
         req <- httr2::req_headers(req, "OpenAI-Organization" = self$organization)
       }
+      
+      if (!is.null(self$project)) {
+        req <- httr2::req_headers(req, "OpenAI-Project" = self$project)
+      }
+      
+      if (!is.null(query)) {
+        req <- httr2::req_url_query(req, !!!query)
+      }
+      
+      if (!is.null(body)) {
+        req <- httr2::req_body_json(req, body)
+      }
+      
+      tryCatch(
+        {
+          if (stream) {
+            # Handle streaming response
+            handle_stream_response(req)
+          } else {
+            resp <- httr2::req_perform(req)
+            handle_response(resp)
+          }
+        },
+        error = function(e) {
+          OpenAIConnectionError(
+            sprintf("Failed to connect to OpenAI API: %s", e$message),
+            parent = e
+          )
+        }
+      )
+    }
       
       # Add project header if present
       if (!is.null(self$project)) {
