@@ -1,0 +1,206 @@
+---
+title: "Introduction to openaiR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to openaiR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+
+`openaiR` is a complete R implementation of the OpenAI Python SDK, providing full compatibility with the OpenAI API. This package allows R users to access all OpenAI services including Chat Completions, Embeddings, Images (DALL-E), Audio (Whisper and TTS), Models, and Fine-tuning.
+
+## Installation
+
+```r
+# Install from GitHub
+install.packages("remotes")
+remotes::install_github("xiaoluolorn/openaiR")
+```
+
+## Quick Start
+
+### Setup
+
+```{r setup, eval=FALSE}
+library(openaiR)
+
+# Method 1: Set API key in environment (recommended)
+Sys.setenv(OPENAI_API_KEY = "your-api-key-here")
+client <- OpenAI$new()
+
+# Method 2: Pass API key directly
+client <- OpenAI$new(api_key = "your-api-key-here")
+```
+
+### Chat Completions
+
+```{r chat, eval=FALSE}
+# Basic chat completion
+response <- client$chat$completions$create(
+  messages = list(
+    list(role = "user", content = "Hello, how are you?")
+  ),
+  model = "gpt-4"
+)
+
+cat(response$choices[[1]]$message$content)
+
+# With parameters
+response <- client$chat$completions$create(
+  messages = list(
+    list(role = "system", content = "You are a helpful assistant."),
+    list(role = "user", content = "What is R?")
+  ),
+  model = "gpt-4",
+  temperature = 0.7,
+  max_tokens = 200
+)
+```
+
+### Embeddings
+
+```{r embeddings, eval=FALSE}
+# Create embeddings
+response <- client$embeddings$create(
+  input = "The quick brown fox jumps over the lazy dog",
+  model = "text-embedding-ada-002"
+)
+
+# Access embedding vector
+embedding <- response$data[[1]]$embedding
+cat("Embedding dimension:", length(embedding))
+```
+
+### Images (DALL-E)
+
+```{r images, eval=FALSE}
+# Generate image
+response <- client$images$create(
+  prompt = "A cute baby sea otter in a spacesuit, digital art",
+  model = "dall-e-3",
+  size = "1024x1024",
+  quality = "hd"
+)
+
+# Get image URL
+cat("Image URL:", response$data[[1]]$url)
+```
+
+### Audio
+
+```{r audio, eval=FALSE}
+# Transcribe audio
+transcription <- client$audio$transcriptions$create(
+  file = "recording.mp3",
+  model = "whisper-1"
+)
+
+cat("Transcription:", transcription$text)
+
+# Text-to-speech
+audio_data <- client$audio$speech$create(
+  input = "Hello, this is a test of text to speech.",
+  model = "tts-1",
+  voice = "alloy"
+)
+
+# Save to file
+writeBin(audio_data, "speech.mp3")
+```
+
+## Key Features
+
+### 1. Full API Compatibility
+
+`openaiR` implements all major OpenAI API endpoints:
+
+- **Chat Completions**: GPT-4, GPT-3.5-Turbo, and more
+- **Embeddings**: Text embedding models
+- **Images**: DALL-E 3 and DALL-E 2
+- **Audio**: Whisper transcriptions, translations, and TTS
+- **Models**: List and retrieve model information
+- **Fine-tuning**: Create and manage fine-tuning jobs
+
+### 2. Python SDK Interface
+
+The API design closely mirrors the Python SDK:
+
+```r
+# Python:
+# client.chat.completions.create(...)
+
+# R:
+client$chat$completions$create(...)
+```
+
+### 3. Convenience Functions
+
+For simple use cases, use convenience functions:
+
+```r
+response <- create_chat_completion(
+  messages = list(list(role = "user", content = "Hello")),
+  model = "gpt-3.5-turbo"
+)
+```
+
+### 4. Error Handling
+
+Comprehensive error handling with specific error classes:
+
+```{r errors, eval=FALSE}
+tryCatch(
+  {
+    response <- client$chat$completions$create(
+      messages = list(list(role = "user", content = "Test")),
+      model = "gpt-4"
+    )
+  },
+  openai_api_error = function(e) {
+    cat("API Error:", e$message, "\n")
+    cat("Status Code:", e$status_code, "\n")
+  },
+  openai_connection_error = function(e) {
+    cat("Connection Error:", e$message, "\n")
+  },
+  error = function(e) {
+    cat("General Error:", e$message, "\n")
+  }
+)
+```
+
+## Configuration
+
+### Environment Variables
+
+- `OPENAI_API_KEY`: Your OpenAI API key (required)
+- `OPENAI_ORG_ID`: Organization ID (optional)
+- `OPENAI_PROJECT_ID`: Project ID (optional)
+
+### Client Options
+
+```{r config, eval=FALSE}
+client <- OpenAI$new(
+  api_key = "your-key",
+  base_url = "https://api.openai.com/v1",
+  organization = "org-123",
+  project = "proj-456",
+  timeout = 600
+)
+```
+
+## Next Steps
+
+- See `vignette("quickstart")` for more examples
+- Read `vignette("function-calling")` for advanced function calling
+- Check `vignette("error-handling")` for detailed error handling guide
+- Visit the [reference documentation](https://xiaoluolorn.github.io/openaiR/reference/) for complete API details

@@ -1,0 +1,85 @@
+url: https://xiaoluolorn.github.io/openaiR/
+template:
+  bootstrap: 5
+  bootswatch: flatly
+
+home:
+  title: "openaiR"
+  description: "Complete R implementation of OpenAI Python SDK"
+
+navbar:
+  structure:
+    left: [intro, reference, articles, tutorials, news]
+    right: [search, github]
+  components:
+    github:
+      icon: fab fa-github fa-lg
+      href: https://github.com/xiaoluolorn/openaiR
+
+reference:
+  - title: Core Client
+    contents:
+      - OpenAI
+  
+  - title: Chat Completions
+    contents:
+      - ChatClient
+      - ChatCompletionsClient
+      - create_chat_completion
+  
+  - title: Embeddings
+    contents:
+      - EmbeddingsClient
+      - create_embedding
+  
+  - title: Images
+    contents:
+      - ImagesClient
+      - create_image
+      - create_image_edit
+      - create_image_variation
+  
+  - title: Audio
+    contents:
+      - AudioClient
+      - AudioTranscriptionsClient
+      - AudioTranslationsClient
+      - SpeechClient
+      - create_transcription
+      - create_translation
+      - create_speech
+  
+  - title: Models
+    contents:
+      - ModelsClient
+      - list_models
+      - retrieve_model
+      - delete_model
+  
+  - title: Fine-tuning
+    contents:
+      - FineTuningClient
+      - FineTuningJobsClient
+      - create_fine_tuning_job
+      - list_fine_tuning_jobs
+      - retrieve_fine_tuning_job
+      - cancel_fine_tuning_job
+      - list_fine_tuning_events
+  
+  - title: Error Handling
+    contents:
+      - OpenAIError
+      - OpenAIConnectionError
+      - OpenAIAPIError
+
+articles:
+  - title: Getting Started
+    contents:
+      - introduction
+      - quickstart
+  
+  - title: Advanced Usage
+    contents:
+      - streaming
+      - function-calling
+      - error-handling
