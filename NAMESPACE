@@ -43,3 +43,9 @@ import(httr2)
 import(jsonlite)
 import(rlang)
 import(glue)
+
+# Multimodal helpers
+export(image_from_url)
+export(image_from_file)
+export(text_content)
+export(create_multimodal_message)

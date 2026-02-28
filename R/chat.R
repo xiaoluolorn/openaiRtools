@@ -38,8 +38,10 @@ ChatCompletionsClient <- R6::R6Class(
     
     #' Create a chat completion
     #'
-    #' @param messages List of message objects. Each message should have 'role' and 'content'
-    #' @param model Model to use (e.g., "gpt-4", "gpt-3.5-turbo")
+    #' @param messages List of message objects. Each message should have 'role' and 'content'.
+    #'        For multimodal (vision) models, content can be a list containing text and images.
+    #'        Use [image_from_url()], [image_from_file()], or [create_multimodal_message()] for images.
+    #' @param model Model to use (e.g., "gpt-4", "gpt-3.5-turbo", "gpt-4-vision-preview")
     #' @param frequency_penalty Frequency penalty (-2.0 to 2.0)
     #' @param logit_bias Modify likelihood of tokens
     #' @param logprobs Return log probabilities
@@ -63,12 +65,38 @@ ChatCompletionsClient <- R6::R6Class(
     #'
     #' @examples
     #' \dontrun{
-    #' # Non-streaming
+    #' # Text-only chat
     #' response <- client$chat$completions$create(
     #'   messages = list(list(role = "user", content = "Hello")),
     #'   model = "gpt-3.5-turbo"
     #' )
     #' cat(response$choices[[1]]$message$content)
+    #'
+    #' # Multimodal chat with image URL
+    #' messages <- list(
+    #'   list(
+    #'     role = "user",
+    #'     content = list(
+    #'       list(type = "text", text = "What's in this image?"),
+    #'       list(type = "image_url", image_url = list(url = "https://example.com/image.jpg"))
+    #'     )
+    #'   )
+    #' )
+    #' response <- client$chat$completions$create(
+    #'   messages = messages,
+    #'   model = "gpt-4-vision-preview"
+    #' )
+    #'
+    #' # Using helper functions for multimodal
+    #' library(openaiR)
+    #' msg <- create_multimodal_message(
+    #'   text = "Describe this image",
+    #'   images = list("path/to/image.jpg")
+    #' )
+    #' response <- client$chat$completions$create(
+    #'   messages = list(msg),
+    #'   model = "gpt-4-vision-preview"
+    #' )
     #'
     #' # Streaming with callback
     #' client$chat$completions$create(
