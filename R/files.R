@@ -22,12 +22,12 @@ FilesClient <- R6::R6Class(
     #' @param purpose Purpose of the file: "assistants", "batch", "fine-tune", "vision"
     #' @return File object
     create = function(file, purpose) {
-      req <- httr2::request(paste0(self$client$base_url, "/files")) |>
-        httr2::req_method("POST") |>
-        httr2::req_headers(
-          "Authorization" = paste("Bearer", self$client$api_key),
-          "OpenAI-Beta" = "assistants=v2"
-        )
+      req <- httr2::request(paste0(self$client$base_url, "/files"))
+      req <- httr2::req_method(req, "POST")
+      req <- httr2::req_headers(req,
+        "Authorization" = paste("Bearer", self$client$api_key),
+        "OpenAI-Beta" = "assistants=v2"
+      )
       
       if (!is.null(self$client$organization)) {
         req <- httr2::req_headers(req, "OpenAI-Organization" = self$client$organization)
@@ -92,12 +92,10 @@ FilesClient <- R6::R6Class(
     #' @param file_id File ID
     #' @return Raw file content
     content = function(file_id) {
-      req <- httr2::request(paste0(self$client$base_url, "/files/", file_id, "/content")) |>
-        httr2::req_method("GET") |>
-        httr2::req_headers(
-          "Authorization" = paste("Bearer", self$client$api_key)
-        ) |>
-        httr2::req_timeout(self$client$timeout)
+      req <- httr2::request(paste0(self$client$base_url, "/files/", file_id, "/content"))
+      req <- httr2::req_method(req, "GET")
+      req <- httr2::req_headers(req, "Authorization" = paste("Bearer", self$client$api_key))
+      req <- httr2::req_timeout(req, self$client$timeout)
       
       if (!is.null(self$client$organization)) {
         req <- httr2::req_headers(req, "OpenAI-Organization" = self$client$organization)

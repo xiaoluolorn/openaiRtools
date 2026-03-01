@@ -118,12 +118,12 @@ create_image_edit <- function(image, prompt, mask = NULL, ...) {
   }
   
   # Create multipart request
-  req <- httr2::request(paste0(client$base_url, "/images/edits")) |>
-    httr2::req_method("POST") |>
-    httr2::req_headers(
-      "Authorization" = paste("Bearer", client$api_key),
-      "OpenAI-Beta" = "assistants=v2"
-    )
+  req <- httr2::request(paste0(client$base_url, "/images/edits"))
+  req <- httr2::req_method(req, "POST")
+  req <- httr2::req_headers(req,
+    "Authorization" = paste("Bearer", client$api_key),
+    "OpenAI-Beta" = "assistants=v2"
+  )
   
   if (!is.null(client$organization)) {
     req <- httr2::req_headers(req, "OpenAI-Organization" = client$organization)
@@ -166,13 +166,13 @@ create_image_variation <- function(image, model = "dall-e-2", ...) {
     body <- c(body, dots)
   }
   
-  # Create multipart request
-  req <- httr2::request(paste0(client$base_url, "/images/variations")) |>
-    httr2::req_method("POST") |>
-    httr2::req_headers(
-      "Authorization" = paste("Bearer", client$api_key),
-      "OpenAI-Beta" = "assistants=v2"
-    )
+# Create multipart request
+  req <- httr2::request(paste0(client$base_url, "/images/variations"))
+  req <- httr2::req_method(req, "POST")
+  req <- httr2::req_headers(req,
+    "Authorization" = paste("Bearer", client$api_key),
+    "OpenAI-Beta" = "assistants=v2"
+  )
   
   if (!is.null(client$organization)) {
     req <- httr2::req_headers(req, "OpenAI-Organization" = client$organization)

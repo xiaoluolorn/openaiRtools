@@ -132,14 +132,14 @@ OpenAI <- R6Class(
     request = function(method, path, body = NULL, query = NULL, stream = FALSE, callback = NULL) {
       url <- paste0(self$base_url, path)
       
-      req <- httr2::request(url) |>
-        httr2::req_method(method) |>
-        httr2::req_headers(
-          "Authorization" = paste("Bearer", self$api_key),
-          "Content-Type" = "application/json",
-          "OpenAI-Beta" = "assistants=v2"
-        ) |>
-        httr2::req_timeout(self$timeout)
+      req <- httr2::request(url)
+      req <- httr2::req_method(req, method)
+      req <- httr2::req_headers(req,
+        "Authorization" = paste("Bearer", self$api_key),
+        "Content-Type" = "application/json",
+        "OpenAI-Beta" = "assistants=v2"
+      )
+      req <- httr2::req_timeout(req, self$timeout)
       
       if (!is.null(self$organization)) {
         req <- httr2::req_headers(req, "OpenAI-Organization" = self$organization)

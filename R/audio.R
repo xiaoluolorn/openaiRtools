@@ -57,12 +57,12 @@ AudioTranscriptionsClient <- R6::R6Class(
                       response_format = NULL,
                       temperature = NULL,
                       timestamp_granularities = NULL) {
-      req <- httr2::request(paste0(self$client$base_url, "/audio/transcriptions")) |>
-        httr2::req_method("POST") |>
-        httr2::req_headers(
-          "Authorization" = paste("Bearer", self$client$api_key),
-          "OpenAI-Beta" = "assistants=v2"
-        )
+      req <- httr2::request(paste0(self$client$base_url, "/audio/transcriptions"))
+      req <- httr2::req_method(req, "POST")
+      req <- httr2::req_headers(req,
+        "Authorization" = paste("Bearer", self$client$api_key),
+        "OpenAI-Beta" = "assistants=v2"
+      )
       
       if (!is.null(self$client$organization)) {
         req <- httr2::req_headers(req, "OpenAI-Organization" = self$client$organization)
@@ -119,12 +119,12 @@ AudioTranslationsClient <- R6::R6Class(
                       prompt = NULL,
                       response_format = NULL,
                       temperature = NULL) {
-      req <- httr2::request(paste0(self$client$base_url, "/audio/translations")) |>
-        httr2::req_method("POST") |>
-        httr2::req_headers(
-          "Authorization" = paste("Bearer", self$client$api_key),
-          "OpenAI-Beta" = "assistants=v2"
-        )
+      req <- httr2::request(paste0(self$client$base_url, "/audio/translations"))
+      req <- httr2::req_method(req, "POST")
+      req <- httr2::req_headers(req,
+        "Authorization" = paste("Bearer", self$client$api_key),
+        "OpenAI-Beta" = "assistants=v2"
+      )
       
       if (!is.null(self$client$organization)) {
         req <- httr2::req_headers(req, "OpenAI-Organization" = self$client$organization)
@@ -184,13 +184,13 @@ SpeechClient <- R6::R6Class(
       if (!is.null(response_format)) body$response_format <- response_format
       if (!is.null(speed)) body$speed <- speed
       
-      req <- httr2::request(paste0(self$client$base_url, "/audio/speech")) |>
-        httr2::req_method("POST") |>
-        httr2::req_headers(
-          "Authorization" = paste("Bearer", self$client$api_key),
-          "Content-Type" = "application/json",
-          "OpenAI-Beta" = "assistants=v2"
-        )
+      req <- httr2::request(paste0(self$client$base_url, "/audio/speech"))
+      req <- httr2::req_method(req, "POST")
+      req <- httr2::req_headers(req,
+        "Authorization" = paste("Bearer", self$client$api_key),
+        "Content-Type" = "application/json",
+        "OpenAI-Beta" = "assistants=v2"
+      )
       
       if (!is.null(self$client$organization)) {
         req <- httr2::req_headers(req, "OpenAI-Organization" = self$client$organization)
