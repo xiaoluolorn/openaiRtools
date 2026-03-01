@@ -8,6 +8,14 @@ Fine-tuning Jobs Client
 
 Fine-tuning Jobs Client
 }
+\section{Public fields}{
+\if{html}{\out{<div class="r6-fields">}}
+\describe{
+\item{\code{checkpoints}}{Checkpoints sub-client
+Create a fine-tuning job}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
@@ -41,7 +49,8 @@ Fine-tuning Jobs Client
   suffix = NULL,
   validation_file = NULL,
   integrations = NULL,
-  seed = NULL
+  seed = NULL,
+  method = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -61,6 +70,8 @@ Fine-tuning Jobs Client
 \item{\code{integrations}}{List of integrations to enable}
 
 \item{\code{seed}}{Random seed}
+
+\item{\code{method}}{Fine-tuning method (e.g., "supervised", "dpo")}
 }
 \if{html}{\out{</div>}}
 }

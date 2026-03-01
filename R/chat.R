@@ -1,6 +1,6 @@
 #' Chat Completions Client
 #'
-#' Client for OpenAI Chat Completions API.
+#' Client for OpenAI Chat Completions API. Access via \code{client$chat}.
 #'
 #' @export
 ChatClient <- R6::R6Class(
@@ -8,12 +8,11 @@ ChatClient <- R6::R6Class(
   public = list(
     client = NULL,
 
-    #' @field completions Chat completions interface
+    #' @field completions Chat completions interface (\code{ChatCompletionsClient})
     completions = NULL,
 
-    #' Initialize chat client
-    #'
-    #' @param parent Parent OpenAI client
+    #' @description Initialize chat client
+    #' @param parent Parent \code{OpenAI} client object
     initialize = function(parent) {
       self$client <- parent
       self$completions <- ChatCompletionsClient$new(parent)
@@ -23,88 +22,243 @@ ChatClient <- R6::R6Class(
 
 #' Chat Completions Interface
 #'
+#' Provides methods to create, manage and retrieve chat completions.
+#' Access via \code{client$chat$completions}.
+#'
 #' @export
 ChatCompletionsClient <- R6::R6Class(
   "ChatCompletionsClient",
   public = list(
     client = NULL,
 
-    #' @field messages Chat completions messages sub-client
+    #' @field messages Sub-client for listing messages from stored completions
     messages = NULL,
 
-    #' Initialize completions client
-    #'
-    #' @param parent Parent OpenAI client
+    #' @description Initialize completions client
+    #' @param parent Parent \code{OpenAI} client object
     initialize = function(parent) {
       self$client <- parent
       self$messages <- ChatCompletionsMessagesClient$new(parent)
     },
 
-    #' Create a chat completion
+    #' @description
+    #' Create a chat completion. This is the core method for generating text
+    #' using GPT models. Supports single-turn and multi-turn conversations,
+    #' streaming, function calling, and multimodal (vision) input.
     #'
-    #' @param messages List of message objects. Each message should have 'role' and 'content'.
-    #'        For multimodal (vision) models, content can be a list containing text and images.
-    #'        Use [image_from_url()], [image_from_file()], or [create_multimodal_message()] for images.
-    #' @param model Model to use (e.g., "gpt-4", "gpt-3.5-turbo", "gpt-4-vision-preview")
-    #' @param frequency_penalty Frequency penalty (-2.0 to 2.0)
-    #' @param logit_bias Modify likelihood of tokens
-    #' @param logprobs Return log probabilities
-    #' @param top_logprobs Number of top log probabilities to return
-    #' @param max_tokens Maximum number of tokens to generate
-    #' @param max_completion_tokens Maximum number of completion tokens to generate
-    #' @param n Number of completions to generate
-    #' @param presence_penalty Presence penalty (-2.0 to 2.0)
-    #' @param response_format Response format specification
-    #' @param seed Random seed
-    #' @param stop Stop sequences
-    #' @param stream Whether to stream partial message deltas
-    #' @param stream_options Options for streaming responses
-    #' @param temperature Sampling temperature (0 to 2)
-    #' @param top_p Nucleus sampling parameter (0 to 1)
-    #' @param tools List of tools available
-    #' @param tool_choice Tool choice strategy
-    #' @param parallel_tool_calls Allow parallel tool calls
-    #' @param user Unique identifier for end user
-    #' @param store Whether to store the completion for later retrieval
-    #' @param metadata Metadata for stored completions
-    #' @param callback Function to call for each stream chunk (only for streaming)
-    #' @param ... Additional parameters
-    #' @return Chat completion response or list of stream chunks
+    #' @param messages \strong{[Required]} A list of message objects. Each message must be a
+    #'   named list with at minimum \code{role} and \code{content}:
+    #'   \itemize{
+    #'     \item \code{role}: One of \code{"system"}, \code{"user"}, \code{"assistant"},
+    #'           \code{"tool"}
+    #'     \item \code{content}: A string, or for multimodal models a list of content parts
+    #'           (see \code{\link{create_multimodal_message}})
+    #'   }
+    #'   Example: \code{list(list(role="user", content="Hello"))}
+    #'
+    #' @param model \strong{[Required]} Model ID string. Common values:
+    #'   \itemize{
+    #'     \item \code{"gpt-4o"} — Latest flagship model, best quality
+    #'     \item \code{"gpt-4o-mini"} — Cheaper, fast
+    #'     \item \code{"gpt-4"} — Previous generation flagship
+    #'     \item \code{"gpt-3.5-turbo"} — Fast and economical
+    #'   }
+    #'   Default: \code{"gpt-3.5-turbo"}
+    #'
+    #' @param temperature Numeric in \code{[0, 2]}. Controls randomness of output.
+    #'   \itemize{
+    #'     \item \code{0}: Nearly deterministic, best for factual tasks
+    #'     \item \code{0.7}: Balanced (recommended default)
+    #'     \item \code{1.5+}: Highly creative/random
+    #'   }
+    #'   Do not set both \code{temperature} and \code{top_p}. Default: \code{NULL} (API default 1).
+    #'
+    #' @param top_p Numeric in \code{(0, 1]}. Nucleus sampling threshold.
+    #'   Only tokens whose cumulative probability mass reaches \code{top_p} are considered.
+    #'   E.g. \code{0.1} = only top 10\% probability tokens. Alternative to \code{temperature}.
+    #'   Default: \code{NULL}.
+    #'
+    #' @param max_tokens Integer. Maximum number of tokens to generate (legacy parameter).
+    #'   Counts output tokens only. For reasoning models use \code{max_completion_tokens}.
+    #'   Default: \code{NULL} (model maximum).
+    #'
+    #' @param max_completion_tokens Integer. Maximum number of tokens to generate,
+    #'   including reasoning tokens for o-series models. Preferred over \code{max_tokens}.
+    #'   Default: \code{NULL}.
+    #'
+    #' @param n Integer. Number of independent completions to generate per request.
+    #'   All \code{n} choices are returned in \code{response$choices}. Higher values
+    #'   increase cost proportionally. Default: \code{NULL} (API default 1).
+    #'
+    #' @param stream Logical. If \code{TRUE}, enables Server-Sent Events (SSE) streaming.
+    #'   \itemize{
+    #'     \item With \code{callback}: calls \code{callback(chunk)} for each delta chunk
+    #'           as it arrives. Returns \code{invisible(NULL)}.
+    #'     \item Without \code{callback}: assembles all chunks automatically and returns
+    #'           a standard response object (same structure as non-streaming).
+    #'   }
+    #'   Default: \code{NULL} (no streaming).
+    #'
+    #' @param callback Function with signature \code{function(chunk)} called for each
+    #'   SSE chunk when \code{stream=TRUE}. Access delta text via
+    #'   \code{chunk$choices[[1]]$delta$content}. Default: \code{NULL}.
+    #'
+    #' @param stop Character string or list of strings. The API stops generating when
+    #'   any of these sequences are encountered. Maximum 4 stop sequences.
+    #'   Default: \code{NULL}.
+    #'
+    #' @param frequency_penalty Numeric in \code{[-2, 2]}. Positive values penalize
+    #'   tokens that have already appeared frequently in the output, reducing repetition.
+    #'   Default: \code{NULL} (API default 0).
+    #'
+    #' @param presence_penalty Numeric in \code{[-2, 2]}. Positive values penalize
+    #'   tokens that have appeared at all in the output so far, encouraging new topics.
+    #'   Default: \code{NULL} (API default 0).
+    #'
+    #' @param logit_bias Named list mapping token IDs (as character strings) to bias
+    #'   values in \code{[-100, 100]}. Use \code{-100} to ban a token completely.
+    #'   Example: \code{list("50256" = -100)}. Default: \code{NULL}.
+    #'
+    #' @param logprobs Logical. If \code{TRUE}, include log probabilities of output tokens.
+    #'   Default: \code{NULL}.
+    #'
+    #' @param top_logprobs Integer in \code{[0, 20]}. Number of most likely tokens to
+    #'   return at each position (requires \code{logprobs=TRUE}). Default: \code{NULL}.
+    #'
+    #' @param response_format List specifying output format. Use
+    #'   \code{list(type="json_object")} to guarantee valid JSON output (the prompt
+    #'   must also instruct the model to produce JSON). Default: \code{NULL}.
+    #'
+    #' @param seed Integer. If set, the API will attempt deterministic sampling. Responses
+    #'   are not guaranteed to be identical but will be more consistent. Default: \code{NULL}.
+    #'
+    #' @param tools List of tool definitions for function calling. Each tool is a named
+    #'   list with \code{type="function"} and a \code{function} field containing
+    #'   \code{name}, \code{description}, and \code{parameters} (JSON Schema).
+    #'   Default: \code{NULL}.
+    #'
+    #' @param tool_choice Controls which tool (if any) is called. Options:
+    #'   \itemize{
+    #'     \item \code{"none"}: Model generates a message, no tool called
+    #'     \item \code{"auto"}: Model decides whether to call a tool (default when tools present)
+    #'     \item \code{"required"}: Model must call at least one tool
+    #'     \item Named list: Force a specific function, e.g.
+    #'           \code{list(type="function", function=list(name="my_func"))}
+    #'   }
+    #'   Default: \code{NULL}.
+    #'
+    #' @param parallel_tool_calls Logical. Whether to allow the model to call multiple
+    #'   tools in parallel. Default: \code{NULL} (API default \code{TRUE}).
+    #'
+    #' @param user Character string. A unique identifier for the end user, used by
+    #'   OpenAI for abuse detection. Default: \code{NULL}.
+    #'
+    #' @param store Logical. If \code{TRUE}, the completion is stored server-side and
+    #'   can be retrieved later via \code{$retrieve()}, \code{$list()}.
+    #'   Default: \code{NULL}.
+    #'
+    #' @param metadata Named list. Arbitrary key-value metadata attached to stored
+    #'   completions (requires \code{store=TRUE}). Default: \code{NULL}.
+    #'
+    #' @param stream_options List of options for streaming. E.g.
+    #'   \code{list(include_usage=TRUE)} to receive token usage in the final chunk.
+    #'   Default: \code{NULL}.
+    #'
+    #' @param ... Additional parameters passed directly to the API body.
+    #'
+    #' @return A named list representing the chat completion object:
+    #'   \describe{
+    #'     \item{\code{$id}}{Character. Unique completion ID, e.g. \code{"chatcmpl-abc123"}.}
+    #'     \item{\code{$object}}{Always \code{"chat.completion"}.}
+    #'     \item{\code{$created}}{Integer. Unix timestamp of creation.}
+    #'     \item{\code{$model}}{Character. Model actually used.}
+    #'     \item{\code{$choices}}{List of choice objects. Usually length 1 (unless \code{n > 1}).
+    #'       \describe{
+    #'         \item{\code{$choices[[1]]$message$role}}{Always \code{"assistant"}.}
+    #'         \item{\code{$choices[[1]]$message$content}}{Character. The generated text. \strong{This is the main output.}}
+    #'         \item{\code{$choices[[1]]$message$tool_calls}}{List. Tool calls made by the model (if any).}
+    #'         \item{\code{$choices[[1]]$finish_reason}}{Why generation stopped: \code{"stop"} (natural end),
+    #'           \code{"length"} (hit max_tokens), \code{"tool_calls"} (function calling),
+    #'           \code{"content_filter"}.}
+    #'       }
+    #'     }
+    #'     \item{\code{$usage}}{Token usage counts:
+    #'       \describe{
+    #'         \item{\code{$usage$prompt_tokens}}{Input tokens consumed.}
+    #'         \item{\code{$usage$completion_tokens}}{Output tokens generated.}
+    #'         \item{\code{$usage$total_tokens}}{Sum of above.}
+    #'       }
+    #'     }
+    #'   }
+    #'   When \code{stream=TRUE} with no callback, also includes \code{$.stream_iterator}
+    #'   (a \code{StreamIterator} object) for advanced chunk access.
     #'
     #' @examples
     #' \dontrun{
-    #' # Text-only chat
+    #' library(openaiR)
+    #' client <- OpenAI$new(api_key = "sk-xxxxxx")
+    #'
+    #' # --- Basic single-turn chat ---
     #' response <- client$chat$completions$create(
-    #'   messages = list(list(role = "user", content = "Hello")),
-    #'   model = "gpt-3.5-turbo"
+    #'   messages = list(list(role = "user", content = "What is R?")),
+    #'   model    = "gpt-4o"
     #' )
     #' cat(response$choices[[1]]$message$content)
     #'
-    #' # Multimodal chat with image URL
-    #' messages <- list(
-    #'   list(
-    #'     role = "user",
-    #'     content = list(
-    #'       list(type = "text", text = "What's in this image?"),
-    #'       list(type = "image_url", image_url = list(url = "https://example.com/image.jpg"))
-    #'     )
-    #'   )
-    #' )
+    #' # --- Multi-turn conversation with system prompt ---
     #' response <- client$chat$completions$create(
-    #'   messages = messages,
-    #'   model = "gpt-4-vision-preview"
+    #'   messages = list(
+    #'     list(role = "system",    content = "You are an econometrics expert."),
+    #'     list(role = "user",      content = "Explain OLS assumptions briefly."),
+    #'     list(role = "assistant", content = "OLS requires linearity, exogeneity..."),
+    #'     list(role = "user",      content = "Give an R code example.")
+    #'   ),
+    #'   model       = "gpt-4o",
+    #'   temperature = 0.3,
+    #'   max_tokens  = 500
     #' )
+    #' cat(response$choices[[1]]$message$content)
     #'
-    #' # Streaming with callback
+    #' # --- Streaming with real-time output ---
     #' client$chat$completions$create(
-    #'   messages = list(list(role = "user", content = "Tell me a story")),
-    #'   model = "gpt-3.5-turbo",
-    #'   stream = TRUE,
+    #'   messages = list(list(role = "user", content = "Write a haiku")),
+    #'   model    = "gpt-4o",
+    #'   stream   = TRUE,
     #'   callback = function(chunk) {
-    #'     content <- chunk$choices[[1]]$delta$content
-    #'     if (!is.null(content)) cat(content)
+    #'     delta <- chunk$choices[[1]]$delta$content
+    #'     if (!is.null(delta)) cat(delta, sep = "")
     #'   }
     #' )
+    #'
+    #' # --- Streaming without callback (auto-assembled) ---
+    #' response <- client$chat$completions$create(
+    #'   messages = list(list(role = "user", content = "Tell me a story")),
+    #'   model    = "gpt-4o",
+    #'   stream   = TRUE
+    #' )
+    #' cat(response$choices[[1]]$message$content)
+    #'
+    #' # --- Force JSON output ---
+    #' response <- client$chat$completions$create(
+    #'   messages = list(
+    #'     list(role = "user",
+    #'          content = "List 3 ML algorithms in JSON with fields: name, use_case")
+    #'   ),
+    #'   model           = "gpt-4o",
+    #'   response_format = list(type = "json_object")
+    #' )
+    #' result <- jsonlite::fromJSON(response$choices[[1]]$message$content)
+    #'
+    #' # --- Generate N candidates ---
+    #' response <- client$chat$completions$create(
+    #'   messages    = list(list(role = "user", content = "Suggest an article title on AI")),
+    #'   model       = "gpt-4o",
+    #'   n           = 3,
+    #'   temperature = 1.2
+    #' )
+    #' for (i in seq_along(response$choices)) {
+    #'   cat(i, ":", response$choices[[i]]$message$content, "\n")
+    #' }
     #' }
     create = function(messages, model = "gpt-3.5-turbo",
                       frequency_penalty = NULL,
@@ -175,37 +329,144 @@ ChatCompletionsClient <- R6::R6Class(
         callback = if (is_streaming) callback else NULL
       )
 
+      # If streaming without callback, assemble chunks into standard response format
+      if (is_streaming && is.null(callback) && inherits(result, "StreamIterator")) {
+        # Collect full content from all delta chunks
+        full_content <- result$get_full_text()
+
+        # Collect tool_calls if any
+        tool_calls_map <- list()
+        # Collect role from the first chunk that has it
+        role <- "assistant"
+        # Collect model, id, etc. from the first chunk
+        first_chunk <- if (length(result$chunks) > 0) result$chunks[[1]] else list()
+
+        for (chunk in result$chunks) {
+          if (!is.null(chunk$choices) && length(chunk$choices) > 0) {
+            delta <- chunk$choices[[1]]$delta
+            if (!is.null(delta$role)) {
+              role <- delta$role
+            }
+            # Collect tool call deltas
+            if (!is.null(delta$tool_calls)) {
+              for (tc in delta$tool_calls) {
+                idx <- as.character(tc$index %||% 0)
+                if (is.null(tool_calls_map[[idx]])) {
+                  tool_calls_map[[idx]] <- list(
+                    id = tc$id %||% "",
+                    type = tc$type %||% "function",
+                    `function` = list(name = "", arguments = "")
+                  )
+                }
+                if (!is.null(tc$id) && tc$id != "") {
+                  tool_calls_map[[idx]]$id <- tc$id
+                }
+                if (!is.null(tc$type) && tc$type != "") {
+                  tool_calls_map[[idx]]$type <- tc$type
+                }
+                if (!is.null(tc$`function`$name)) {
+                  tool_calls_map[[idx]]$`function`$name <- paste0(
+                    tool_calls_map[[idx]]$`function`$name, tc$`function`$name
+                  )
+                }
+                if (!is.null(tc$`function`$arguments)) {
+                  tool_calls_map[[idx]]$`function`$arguments <- paste0(
+                    tool_calls_map[[idx]]$`function`$arguments, tc$`function`$arguments
+                  )
+                }
+              }
+            }
+          }
+        }
+
+        # Build the assembled message
+        message <- list(role = role, content = full_content)
+        if (length(tool_calls_map) > 0) {
+          message$tool_calls <- unname(tool_calls_map)
+        }
+
+        # Get finish_reason from the last chunk that has it
+        finish_reason <- NULL
+        for (chunk in rev(result$chunks)) {
+          if (!is.null(chunk$choices) && length(chunk$choices) > 0 &&
+            !is.null(chunk$choices[[1]]$finish_reason)) {
+            finish_reason <- chunk$choices[[1]]$finish_reason
+            break
+          }
+        }
+
+        # Build standard chat completion response
+        assembled <- list(
+          id = first_chunk$id %||% NULL,
+          object = "chat.completion",
+          created = first_chunk$created %||% NULL,
+          model = first_chunk$model %||% model,
+          choices = list(
+            list(
+              index = 0,
+              message = message,
+              finish_reason = finish_reason
+            )
+          ),
+          usage = NULL
+        )
+
+        # Attach the original stream iterator for advanced users
+        assembled$.stream_iterator <- result
+
+        return(assembled)
+      }
+
       # Return result
       result
     },
 
-    #' Retrieve a stored chat completion
-    #'
-    #' @param completion_id The ID of the chat completion to retrieve
-    #' @return Chat completion object
+    #' @description Retrieve a stored chat completion by ID.
+    #' @param completion_id Character. The completion ID (e.g. from \code{response$id})
+    #'   of a previously created completion with \code{store=TRUE}.
+    #' @return A chat completion list object.
+    #' @examples
+    #' \dontrun{
+    #' stored <- client$chat$completions$retrieve("chatcmpl-abc123")
+    #' cat(stored$choices[[1]]$message$content)
+    #' }
     retrieve = function(completion_id) {
       self$client$request("GET", paste0("/chat/completions/", completion_id))
     },
 
-    #' Update a stored chat completion
-    #'
-    #' @param completion_id The ID of the chat completion to update
-    #' @param metadata Metadata to update
-    #' @return Updated chat completion object
+    #' @description Update the metadata of a stored chat completion.
+    #' @param completion_id Character. Completion ID to update.
+    #' @param metadata Named list. New metadata key-value pairs to attach.
+    #' @return Updated chat completion object.
+    #' @examples
+    #' \dontrun{
+    #' client$chat$completions$update(
+    #'   "chatcmpl-abc123",
+    #'   metadata = list(project = "research", version = "v2")
+    #' )
+    #' }
     update = function(completion_id, metadata = NULL) {
       body <- list()
       if (!is.null(metadata)) body$metadata <- metadata
       self$client$request("POST", paste0("/chat/completions/", completion_id), body = body)
     },
 
-    #' List stored chat completions
-    #'
-    #' @param model Filter by model
-    #' @param after Cursor for pagination
-    #' @param limit Number of completions to return (default 20, max 100)
-    #' @param order Sort order: "asc" or "desc"
-    #' @param metadata Filter by metadata
-    #' @return List of chat completions
+    #' @description List stored chat completions with optional filters.
+    #' @param model Character. Filter results to a specific model ID. Default: \code{NULL}.
+    #' @param after Character. Pagination cursor — the ID of the last item from the
+    #'   previous page. Default: \code{NULL}.
+    #' @param limit Integer. Number of completions to return per page (1-100).
+    #'   Default: \code{NULL} (API default 20).
+    #' @param order Character. Sort order: \code{"asc"} or \code{"desc"} by creation time.
+    #'   Default: \code{NULL}.
+    #' @param metadata List. Filter by metadata key-value pairs. Default: \code{NULL}.
+    #' @return A list with \code{$data} (list of completion objects) and
+    #'   \code{$has_more} (logical).
+    #' @examples
+    #' \dontrun{
+    #' page <- client$chat$completions$list(model = "gpt-4o", limit = 10)
+    #' for (c in page$data) cat(c$id, "\n")
+    #' }
     list = function(model = NULL, after = NULL, limit = NULL, order = NULL, metadata = NULL) {
       query <- list()
       if (!is.null(model)) query$model <- model
@@ -217,10 +478,13 @@ ChatCompletionsClient <- R6::R6Class(
       self$client$request("GET", "/chat/completions", query = query)
     },
 
-    #' Delete a stored chat completion
-    #'
-    #' @param completion_id The ID of the chat completion to delete
-    #' @return Deletion status
+    #' @description Delete a stored chat completion.
+    #' @param completion_id Character. Completion ID to delete.
+    #' @return A deletion status list with \code{$deleted} (logical).
+    #' @examples
+    #' \dontrun{
+    #' client$chat$completions$delete("chatcmpl-abc123")
+    #' }
     delete = function(completion_id) {
       self$client$request("DELETE", paste0("/chat/completions/", completion_id))
     }
@@ -229,7 +493,8 @@ ChatCompletionsClient <- R6::R6Class(
 
 #' Chat Completions Messages Client
 #'
-#' Client for listing messages from stored chat completions.
+#' Lists messages from stored chat completions.
+#' Access via \code{client$chat$completions$messages}.
 #'
 #' @export
 ChatCompletionsMessagesClient <- R6::R6Class(
@@ -237,20 +502,22 @@ ChatCompletionsMessagesClient <- R6::R6Class(
   public = list(
     client = NULL,
 
-    #' Initialize messages client
-    #'
-    #' @param parent Parent OpenAI client
+    #' @description Initialize messages client
+    #' @param parent Parent \code{OpenAI} client object
     initialize = function(parent) {
       self$client <- parent
     },
 
-    #' List messages from a stored chat completion
-    #'
-    #' @param completion_id The ID of the chat completion
-    #' @param after Cursor for pagination
-    #' @param limit Number of messages to return
-    #' @param order Sort order: "asc" or "desc"
-    #' @return List of messages
+    #' @description List messages from a stored chat completion.
+    #' @param completion_id Character. ID of the stored chat completion.
+    #' @param after Character. Pagination cursor. Default: \code{NULL}.
+    #' @param limit Integer. Number of messages to return. Default: \code{NULL}.
+    #' @param order Character. \code{"asc"} or \code{"desc"}. Default: \code{NULL}.
+    #' @return A list with \code{$data} containing message objects.
+    #' @examples
+    #' \dontrun{
+    #' msgs <- client$chat$completions$messages$list("chatcmpl-abc123")
+    #' }
     list = function(completion_id, after = NULL, limit = NULL, order = NULL) {
       query <- list()
       if (!is.null(after)) query$after <- after
@@ -262,13 +529,45 @@ ChatCompletionsMessagesClient <- R6::R6Class(
   )
 )
 
-#' Create a chat completion (convenience function)
+#' Create a Chat Completion (Convenience Function)
 #'
-#' @param messages List of message objects
-#' @param model Model to use
-#' @param ... Additional parameters passed to chat$completions$create()
-#' @return Chat completion response
+#' A shortcut that automatically creates an \code{\link{OpenAI}} client from the
+#' \code{OPENAI_API_KEY} environment variable and calls
+#' \code{client$chat$completions$create()}.
+#'
+#' @param messages \strong{[Required]} List of message objects. Each must have
+#'   \code{role} (\code{"system"}, \code{"user"}, \code{"assistant"}) and
+#'   \code{content} fields.
+#' @param model Character. Model ID. Default: \code{"gpt-3.5-turbo"}.
+#' @param ... Additional parameters passed to
+#'   \code{\link{ChatCompletionsClient}}\code{$create()}, such as
+#'   \code{temperature}, \code{max_tokens}, \code{stream}, etc.
+#'
+#' @return A chat completion list object. Key fields:
+#'   \itemize{
+#'     \item \code{$choices[[1]]$message$content} — The generated text
+#'     \item \code{$usage$total_tokens} — Total tokens consumed
+#'   }
+#'
 #' @export
+#' @examples
+#' \dontrun{
+#' Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+#'
+#' response <- create_chat_completion(
+#'   messages = list(list(role = "user", content = "What is machine learning?")),
+#'   model    = "gpt-4o"
+#' )
+#' cat(response$choices[[1]]$message$content)
+#'
+#' # With extra parameters
+#' response <- create_chat_completion(
+#'   messages    = list(list(role = "user", content = "Write a poem")),
+#'   model       = "gpt-4o",
+#'   temperature = 1.2,
+#'   max_tokens  = 200
+#' )
+#' }
 create_chat_completion <- function(messages, model = "gpt-3.5-turbo", ...) {
   client <- OpenAI$new()
   client$chat$completions$create(messages = messages, model = model, ...)

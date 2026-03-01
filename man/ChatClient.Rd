@@ -4,13 +4,17 @@
 \alias{ChatClient}
 \title{Chat Completions Client}
 \description{
-Client for OpenAI Chat Completions API.
+Chat Completions Client
+
+Chat Completions Client
+}
+\details{
+Client for OpenAI Chat Completions API. Access via \code{client$chat}.
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{completions}}{Chat completions interface
-Initialize chat client}
+\item{\code{completions}}{Chat completions interface (\code{ChatCompletionsClient})}
 }
 \if{html}{\out{</div>}}
 }
@@ -25,6 +29,7 @@ Initialize chat client}
 \if{html}{\out{<a id="method-ChatClient-new"></a>}}
 \if{latex}{\out{\hypertarget{method-ChatClient-new}{}}}
 \subsection{Method \code{new()}}{
+Initialize chat client
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ChatClient$new(parent)}\if{html}{\out{</div>}}
 }
@@ -32,7 +37,7 @@ Initialize chat client}
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{parent}}{Parent OpenAI client}
+\item{\code{parent}}{Parent \code{OpenAI} client object}
 }
 \if{html}{\out{</div>}}
 }

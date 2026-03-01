@@ -2,20 +2,34 @@
 % Please edit documentation in R/embeddings.R
 \name{create_embedding}
 \alias{create_embedding}
-\title{Create embeddings (convenience function)}
+\title{Create Text Embeddings (Convenience Function)}
 \usage{
 create_embedding(input, model = "text-embedding-ada-002", ...)
 }
 \arguments{
-\item{input}{Input text or texts}
+\item{input}{\strong{\link{Required}} A character string or list of strings to embed.}
 
-\item{model}{Model to use}
+\item{model}{Character. Embedding model. Default: \code{"text-embedding-ada-002"}.}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters passed to \code{EmbeddingsClient$create()},
+such as \code{dimensions} or \code{encoding_format}.}
 }
 \value{
-Embeddings response
+A named list with \code{$data[[i]]$embedding} containing the
+numeric embedding vectors.
 }
 \description{
-Create embeddings (convenience function)
+Shortcut that automatically creates an \code{\link{OpenAI}} client and calls
+\code{client$embeddings$create()}. The API key is read from the
+\code{OPENAI_API_KEY} environment variable.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+# Single embedding
+resp <- create_embedding("Hello world", model = "text-embedding-3-small")
+vec <- unlist(resp$data[[1]]$embedding)
+cat("Vector length:", length(vec))
+}
 }

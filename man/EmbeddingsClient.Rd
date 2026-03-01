@@ -4,7 +4,53 @@
 \alias{EmbeddingsClient}
 \title{Embeddings Client}
 \description{
-Client for OpenAI Embeddings API.
+Embeddings Client
+
+Embeddings Client
+}
+\details{
+Provides text embedding (vectorization) via the OpenAI Embeddings API.
+Access via \code{client$embeddings}.
+
+Embeddings are numerical vector representations of text that capture semantic
+meaning. Similar texts produce similar vectors. Common uses include semantic
+search, clustering, classification, and recommendation systems.
+}
+\examples{
+
+## ------------------------------------------------
+## Method `EmbeddingsClient$create`
+## ------------------------------------------------
+
+\dontrun{
+client <- OpenAI$new(api_key = "sk-xxxxxx")
+
+# --- Single text embedding ---
+resp <- client$embeddings$create(
+  input = "The impact of monetary policy on inflation",
+  model = "text-embedding-3-small"
+)
+vec <- unlist(resp$data[[1]]$embedding)
+cat("Dimensions:", length(vec), "\n")  # 1536
+
+# --- Batch embedding ---
+texts <- list("GDP growth", "Interest rates", "Today is sunny")
+resp <- client$embeddings$create(input = texts, model = "text-embedding-3-small")
+vecs <- lapply(resp$data, function(d) unlist(d$embedding))
+
+# Cosine similarity function
+cosine_sim <- function(a, b) sum(a * b) / (sqrt(sum(a^2)) * sqrt(sum(b^2)))
+cat("Econ similarity:", cosine_sim(vecs[[1]], vecs[[2]]), "\n")  # high
+cat("Topic distance:",  cosine_sim(vecs[[1]], vecs[[3]]), "\n")  # low
+
+# --- Reduced dimensions (cheaper storage) ---
+resp <- client$embeddings$create(
+  input      = "Machine learning in economics",
+  model      = "text-embedding-3-large",
+  dimensions = 256
+)
+cat("Dimensions:", length(unlist(resp$data[[1]]$embedding)), "\n")  # 256
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -18,6 +64,7 @@ Client for OpenAI Embeddings API.
 \if{html}{\out{<a id="method-EmbeddingsClient-new"></a>}}
 \if{latex}{\out{\hypertarget{method-EmbeddingsClient-new}{}}}
 \subsection{Method \code{new()}}{
+Initialize embeddings client
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{EmbeddingsClient$new(parent)}\if{html}{\out{</div>}}
 }
@@ -25,8 +72,7 @@ Client for OpenAI Embeddings API.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{parent}}{Parent OpenAI client
-Create embeddings for text}
+\item{\code{parent}}{Parent \code{OpenAI} client object}
 }
 \if{html}{\out{</div>}}
 }
@@ -35,6 +81,9 @@ Create embeddings for text}
 \if{html}{\out{<a id="method-EmbeddingsClient-create"></a>}}
 \if{latex}{\out{\hypertarget{method-EmbeddingsClient-create}{}}}
 \subsection{Method \code{create()}}{
+Create embedding vectors for one or more text inputs.
+Each text is converted to a fixed-length numerical vector that encodes
+its semantic meaning.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{EmbeddingsClient$create(
   input,
@@ -48,21 +97,94 @@ Create embeddings for text}
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{input}}{Input text or array of texts}
+\item{\code{input}}{\strong{\link{Required}} The text to embed. Can be:
+\itemize{
+\item A single character string: \code{"Hello world"}
+\item A list of strings for batch processing:
+\code{list("text 1", "text 2", "text 3")}
+}
+Maximum input length depends on the model (e.g. 8191 tokens for
+\code{text-embedding-ada-002}).}
 
-\item{\code{model}}{Model to use (e.g., "text-embedding-ada-002")}
+\item{\code{model}}{Character. Embedding model to use:
+\itemize{
+\item \code{"text-embedding-3-small"} — 1536 dimensions, faster, cheaper
+\item \code{"text-embedding-3-large"} — 3072 dimensions, highest quality
+\item \code{"text-embedding-ada-002"} — 1536 dimensions, legacy model
+}
+Default: \code{"text-embedding-ada-002"}.}
 
-\item{\code{encoding_format}}{Format for embeddings ("float" or "base64")}
+\item{\code{encoding_format}}{Character. Format of the returned embedding vectors:
+\itemize{
+\item \code{"float"} (default) — Returns a list of floating-point numbers
+\item \code{"base64"} — Returns base64-encoded compact binary string
+}
+Default: \code{NULL} (API default \code{"float"}).}
 
-\item{\code{dimensions}}{Number of dimensions for embeddings}
+\item{\code{dimensions}}{Integer. Number of dimensions for the output embedding.
+Only supported by \code{text-embedding-3-*} models. Reduces vector size
+while preserving most semantic information.
+E.g. set \code{dimensions=256} to get 256-dim vectors instead of 1536.
+Default: \code{NULL} (full dimensions).}
 
-\item{\code{user}}{Unique identifier for end user}
+\item{\code{user}}{Character. End-user identifier for abuse monitoring.
+Default: \code{NULL}.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-Embeddings response
+A named list:
+\describe{
+\item{\code{$object}}{Always \code{"list"}.}
+\item{\code{$data}}{List of embedding objects (one per input):
+\describe{
+\item{\code{$data[[i]]$embedding}}{Numeric vector of floats — the embedding.
+Use \code{unlist()} to convert to an R numeric vector.}
+\item{\code{$data[[i]]$index}}{Integer. Position of this item in the input list.}
+\item{\code{$data[[i]]$object}}{Always \code{"embedding"}.}
 }
+}
+\item{\code{$model}}{The model used.}
+\item{\code{$usage$prompt_tokens}}{Tokens consumed.}
+\item{\code{$usage$total_tokens}}{Total tokens.}
+}
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+client <- OpenAI$new(api_key = "sk-xxxxxx")
+
+# --- Single text embedding ---
+resp <- client$embeddings$create(
+  input = "The impact of monetary policy on inflation",
+  model = "text-embedding-3-small"
+)
+vec <- unlist(resp$data[[1]]$embedding)
+cat("Dimensions:", length(vec), "\n")  # 1536
+
+# --- Batch embedding ---
+texts <- list("GDP growth", "Interest rates", "Today is sunny")
+resp <- client$embeddings$create(input = texts, model = "text-embedding-3-small")
+vecs <- lapply(resp$data, function(d) unlist(d$embedding))
+
+# Cosine similarity function
+cosine_sim <- function(a, b) sum(a * b) / (sqrt(sum(a^2)) * sqrt(sum(b^2)))
+cat("Econ similarity:", cosine_sim(vecs[[1]], vecs[[2]]), "\n")  # high
+cat("Topic distance:",  cosine_sim(vecs[[1]], vecs[[3]]), "\n")  # low
+
+# --- Reduced dimensions (cheaper storage) ---
+resp <- client$embeddings$create(
+  input      = "Machine learning in economics",
+  model      = "text-embedding-3-large",
+  dimensions = 256
+)
+cat("Dimensions:", length(unlist(resp$data[[1]]$embedding)), "\n")  # 256
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-EmbeddingsClient-clone"></a>}}

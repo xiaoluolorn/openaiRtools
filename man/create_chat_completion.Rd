@@ -2,20 +2,49 @@
 % Please edit documentation in R/chat.R
 \name{create_chat_completion}
 \alias{create_chat_completion}
-\title{Create a chat completion (convenience function)}
+\title{Create a Chat Completion (Convenience Function)}
 \usage{
 create_chat_completion(messages, model = "gpt-3.5-turbo", ...)
 }
 \arguments{
-\item{messages}{List of message objects}
+\item{messages}{\strong{\link{Required}} List of message objects. Each must have
+\code{role} (\code{"system"}, \code{"user"}, \code{"assistant"}) and
+\code{content} fields.}
 
-\item{model}{Model to use}
+\item{model}{Character. Model ID. Default: \code{"gpt-3.5-turbo"}.}
 
-\item{...}{Additional parameters passed to chat$completions$create()}
+\item{...}{Additional parameters passed to
+\code{\link{ChatCompletionsClient}}\code{$create()}, such as
+\code{temperature}, \code{max_tokens}, \code{stream}, etc.}
 }
 \value{
-Chat completion response
+A chat completion list object. Key fields:
+\itemize{
+\item \code{$choices[[1]]$message$content} — The generated text
+\item \code{$usage$total_tokens} — Total tokens consumed
+}
 }
 \description{
-Create a chat completion (convenience function)
+A shortcut that automatically creates an \code{\link{OpenAI}} client from the
+\code{OPENAI_API_KEY} environment variable and calls
+\code{client$chat$completions$create()}.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+response <- create_chat_completion(
+  messages = list(list(role = "user", content = "What is machine learning?")),
+  model    = "gpt-4o"
+)
+cat(response$choices[[1]]$message$content)
+
+# With extra parameters
+response <- create_chat_completion(
+  messages    = list(list(role = "user", content = "Write a poem")),
+  model       = "gpt-4o",
+  temperature = 1.2,
+  max_tokens  = 200
+)
+}
 }

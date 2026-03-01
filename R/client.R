@@ -71,15 +71,53 @@ OpenAI <- R6Class(
     #' @field responses Responses client
     responses = NULL,
 
-    #' Initialize OpenAI client
+    #' @description
+    #' Create and initialize an OpenAI API client. This is the main entry point
+    #' for all API interactions. All sub-clients (chat, embeddings, images, etc.)
+    #' are initialized automatically.
     #'
-    #' @param api_key OpenAI API key. If NULL, will use OPENAI_API_KEY env var.
-    #' @param base_url Base URL. Default: "https://api.openai.com/v1"
-    #' @param organization Organization ID. Optional.
-    #' @param project Project ID. Optional.
-    #' @param timeout Request timeout in seconds. Default: 600
-    #' @param max_retries Maximum number of retries. Default: 2
-    #' @return OpenAI client object
+    #' @param api_key Character. Your OpenAI API key (starts with \code{"sk-"}).
+    #'   If \code{NULL}, reads from the \code{OPENAI_API_KEY} environment variable.
+    #'   \strong{Recommended}: store key in \code{~/.Renviron} as
+    #'   \code{OPENAI_API_KEY=sk-...} rather than hardcoding in scripts.
+    #'   Default: \code{NULL}.
+    #'
+    #' @param base_url Character. Base URL for all API requests.
+    #'   Change this to use OpenAI-compatible third-party APIs
+    #'   (e.g. ModelScope, Azure OpenAI, local LLM servers).
+    #'   Default: \code{"https://api.openai.com/v1"}.
+    #'
+    #' @param organization Character. OpenAI Organization ID (format: \code{"org-xxx"}).
+    #'   If \code{NULL}, reads from \code{OPENAI_ORG_ID} env var.
+    #'   Only needed if your account belongs to multiple organizations.
+    #'   Default: \code{NULL}.
+    #'
+    #' @param project Character. OpenAI Project ID (format: \code{"proj-xxx"}).
+    #'   If \code{NULL}, reads from \code{OPENAI_PROJECT_ID} env var.
+    #'   Default: \code{NULL}.
+    #'
+    #' @param timeout Numeric. HTTP request timeout in seconds.
+    #'   Increase for long-running requests (large outputs, slow networks).
+    #'   Default: \code{600}.
+    #'
+    #' @param max_retries Integer. Maximum number of automatic retries on
+    #'   transient errors (HTTP 408, 429, 500, 502, 503, 504).
+    #'   Uses exponential backoff between retries. Set to \code{0} to disable.
+    #'   Default: \code{2}.
+    #'
+    #' @return An \code{OpenAI} R6 object with the following sub-client fields:
+    #'   \describe{
+    #'     \item{\code{$chat}}{ChatClient — Chat Completions API}
+    #'     \item{\code{$embeddings}}{EmbeddingsClient — Text embedding vectors}
+    #'     \item{\code{$images}}{ImagesClient — DALL-E image generation}
+    #'     \item{\code{$audio}}{AudioClient — Whisper transcription / TTS}
+    #'     \item{\code{$models}}{ModelsClient — List and manage models}
+    #'     \item{\code{$fine_tuning}}{FineTuningClient — Fine-tune jobs}
+    #'     \item{\code{$files}}{FilesClient — Upload and manage files}
+    #'     \item{\code{$moderations}}{ModerationsClient — Content safety}
+    #'     \item{\code{$completions}}{CompletionsClient — Legacy text completions}
+    #'     \item{\code{$responses}}{ResponsesClient — New Responses API}
+    #'   }
     initialize = function(api_key = NULL, base_url = NULL,
                           organization = NULL, project = NULL,
                           timeout = 600, max_retries = 2) {

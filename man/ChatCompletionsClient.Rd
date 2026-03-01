@@ -8,11 +8,136 @@ Chat Completions Interface
 
 Chat Completions Interface
 }
+\details{
+Provides methods to create, manage and retrieve chat completions.
+Access via \code{client$chat$completions}.
+}
+\examples{
+
+## ------------------------------------------------
+## Method `ChatCompletionsClient$create`
+## ------------------------------------------------
+
+\dontrun{
+library(openaiR)
+client <- OpenAI$new(api_key = "sk-xxxxxx")
+
+# --- Basic single-turn chat ---
+response <- client$chat$completions$create(
+  messages = list(list(role = "user", content = "What is R?")),
+  model    = "gpt-4o"
+)
+cat(response$choices[[1]]$message$content)
+
+# --- Multi-turn conversation with system prompt ---
+response <- client$chat$completions$create(
+  messages = list(
+    list(role = "system",    content = "You are an econometrics expert."),
+    list(role = "user",      content = "Explain OLS assumptions briefly."),
+    list(role = "assistant", content = "OLS requires linearity, exogeneity..."),
+    list(role = "user",      content = "Give an R code example.")
+  ),
+  model       = "gpt-4o",
+  temperature = 0.3,
+  max_tokens  = 500
+)
+cat(response$choices[[1]]$message$content)
+
+# --- Streaming with real-time output ---
+client$chat$completions$create(
+  messages = list(list(role = "user", content = "Write a haiku")),
+  model    = "gpt-4o",
+  stream   = TRUE,
+  callback = function(chunk) {
+    delta <- chunk$choices[[1]]$delta$content
+    if (!is.null(delta)) cat(delta, sep = "")
+  }
+)
+
+# --- Streaming without callback (auto-assembled) ---
+response <- client$chat$completions$create(
+  messages = list(list(role = "user", content = "Tell me a story")),
+  model    = "gpt-4o",
+  stream   = TRUE
+)
+cat(response$choices[[1]]$message$content)
+
+# --- Force JSON output ---
+response <- client$chat$completions$create(
+  messages = list(
+    list(role = "user",
+         content = "List 3 ML algorithms in JSON with fields: name, use_case")
+  ),
+  model           = "gpt-4o",
+  response_format = list(type = "json_object")
+)
+result <- jsonlite::fromJSON(response$choices[[1]]$message$content)
+
+# --- Generate N candidates ---
+response <- client$chat$completions$create(
+  messages    = list(list(role = "user", content = "Suggest an article title on AI")),
+  model       = "gpt-4o",
+  n           = 3,
+  temperature = 1.2
+)
+for (i in seq_along(response$choices)) {
+  cat(i, ":", response$choices[[i]]$message$content, "\n")
+}
+}
+
+## ------------------------------------------------
+## Method `ChatCompletionsClient$retrieve`
+## ------------------------------------------------
+
+\dontrun{
+stored <- client$chat$completions$retrieve("chatcmpl-abc123")
+cat(stored$choices[[1]]$message$content)
+}
+
+## ------------------------------------------------
+## Method `ChatCompletionsClient$update`
+## ------------------------------------------------
+
+\dontrun{
+client$chat$completions$update(
+  "chatcmpl-abc123",
+  metadata = list(project = "research", version = "v2")
+)
+}
+
+## ------------------------------------------------
+## Method `ChatCompletionsClient$list`
+## ------------------------------------------------
+
+\dontrun{
+page <- client$chat$completions$list(model = "gpt-4o", limit = 10)
+for (c in page$data) cat(c$id, "\n")
+}
+
+## ------------------------------------------------
+## Method `ChatCompletionsClient$delete`
+## ------------------------------------------------
+
+\dontrun{
+client$chat$completions$delete("chatcmpl-abc123")
+}
+}
+\section{Public fields}{
+\if{html}{\out{<div class="r6-fields">}}
+\describe{
+\item{\code{messages}}{Sub-client for listing messages from stored completions}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-ChatCompletionsClient-new}{\code{ChatCompletionsClient$new()}}
 \item \href{#method-ChatCompletionsClient-create}{\code{ChatCompletionsClient$create()}}
+\item \href{#method-ChatCompletionsClient-retrieve}{\code{ChatCompletionsClient$retrieve()}}
+\item \href{#method-ChatCompletionsClient-update}{\code{ChatCompletionsClient$update()}}
+\item \href{#method-ChatCompletionsClient-list}{\code{ChatCompletionsClient$list()}}
+\item \href{#method-ChatCompletionsClient-delete}{\code{ChatCompletionsClient$delete()}}
 \item \href{#method-ChatCompletionsClient-clone}{\code{ChatCompletionsClient$clone()}}
 }
 }
@@ -20,6 +145,7 @@ Chat Completions Interface
 \if{html}{\out{<a id="method-ChatCompletionsClient-new"></a>}}
 \if{latex}{\out{\hypertarget{method-ChatCompletionsClient-new}{}}}
 \subsection{Method \code{new()}}{
+Initialize completions client
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ChatCompletionsClient$new(parent)}\if{html}{\out{</div>}}
 }
@@ -27,8 +153,7 @@ Chat Completions Interface
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{parent}}{Parent OpenAI client
-Create a chat completion}
+\item{\code{parent}}{Parent \code{OpenAI} client object}
 }
 \if{html}{\out{</div>}}
 }
@@ -37,6 +162,9 @@ Create a chat completion}
 \if{html}{\out{<a id="method-ChatCompletionsClient-create"></a>}}
 \if{latex}{\out{\hypertarget{method-ChatCompletionsClient-create}{}}}
 \subsection{Method \code{create()}}{
+Create a chat completion. This is the core method for generating text
+using GPT models. Supports single-turn and multi-turn conversations,
+streaming, function calling, and multimodal (vision) input.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ChatCompletionsClient$create(
   messages,
@@ -46,6 +174,7 @@ Create a chat completion}
   logprobs = NULL,
   top_logprobs = NULL,
   max_tokens = NULL,
+  max_completion_tokens = NULL,
   n = NULL,
   presence_penalty = NULL,
   response_format = NULL,
@@ -57,7 +186,11 @@ Create a chat completion}
   top_p = NULL,
   tools = NULL,
   tool_choice = NULL,
+  parallel_tool_calls = NULL,
   user = NULL,
+  store = NULL,
+  metadata = NULL,
+  callback = NULL,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -65,51 +198,375 @@ Create a chat completion}
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{messages}}{List of message objects. Each message should have 'role' and 'content'}
+\item{\code{messages}}{\strong{\link{Required}} A list of message objects. Each message must be a
+named list with at minimum \code{role} and \code{content}:
+\itemize{
+\item \code{role}: One of \code{"system"}, \code{"user"}, \code{"assistant"},
+\code{"tool"}
+\item \code{content}: A string, or for multimodal models a list of content parts
+(see \code{\link{create_multimodal_message}})
+}
+Example: \code{list(list(role="user", content="Hello"))}}
 
-\item{\code{model}}{Model to use (e.g., "gpt-4", "gpt-3.5-turbo")}
+\item{\code{model}}{\strong{\link{Required}} Model ID string. Common values:
+\itemize{
+\item \code{"gpt-4o"} — Latest flagship model, best quality
+\item \code{"gpt-4o-mini"} — Cheaper, fast
+\item \code{"gpt-4"} — Previous generation flagship
+\item \code{"gpt-3.5-turbo"} — Fast and economical
+}
+Default: \code{"gpt-3.5-turbo"}}
 
-\item{\code{frequency_penalty}}{Frequency penalty (-2.0 to 2.0)}
+\item{\code{frequency_penalty}}{Numeric in \code{[-2, 2]}. Positive values penalize
+tokens that have already appeared frequently in the output, reducing repetition.
+Default: \code{NULL} (API default 0).}
 
-\item{\code{logit_bias}}{Modify likelihood of tokens}
+\item{\code{logit_bias}}{Named list mapping token IDs (as character strings) to bias
+values in \code{[-100, 100]}. Use \code{-100} to ban a token completely.
+Example: \code{list("50256" = -100)}. Default: \code{NULL}.}
 
-\item{\code{logprobs}}{Return log probabilities}
+\item{\code{logprobs}}{Logical. If \code{TRUE}, include log probabilities of output tokens.
+Default: \code{NULL}.}
 
-\item{\code{top_logprobs}}{Number of top log probabilities to return}
+\item{\code{top_logprobs}}{Integer in \code{[0, 20]}. Number of most likely tokens to
+return at each position (requires \code{logprobs=TRUE}). Default: \code{NULL}.}
 
-\item{\code{max_tokens}}{Maximum number of tokens to generate}
+\item{\code{max_tokens}}{Integer. Maximum number of tokens to generate (legacy parameter).
+Counts output tokens only. For reasoning models use \code{max_completion_tokens}.
+Default: \code{NULL} (model maximum).}
 
-\item{\code{n}}{Number of completions to generate}
+\item{\code{max_completion_tokens}}{Integer. Maximum number of tokens to generate,
+including reasoning tokens for o-series models. Preferred over \code{max_tokens}.
+Default: \code{NULL}.}
 
-\item{\code{presence_penalty}}{Presence penalty (-2.0 to 2.0)}
+\item{\code{n}}{Integer. Number of independent completions to generate per request.
+All \code{n} choices are returned in \code{response$choices}. Higher values
+increase cost proportionally. Default: \code{NULL} (API default 1).}
 
-\item{\code{response_format}}{Response format specification}
+\item{\code{presence_penalty}}{Numeric in \code{[-2, 2]}. Positive values penalize
+tokens that have appeared at all in the output so far, encouraging new topics.
+Default: \code{NULL} (API default 0).}
 
-\item{\code{seed}}{Random seed}
+\item{\code{response_format}}{List specifying output format. Use
+\code{list(type="json_object")} to guarantee valid JSON output (the prompt
+must also instruct the model to produce JSON). Default: \code{NULL}.}
 
-\item{\code{stop}}{Stop sequences}
+\item{\code{seed}}{Integer. If set, the API will attempt deterministic sampling. Responses
+are not guaranteed to be identical but will be more consistent. Default: \code{NULL}.}
 
-\item{\code{stream}}{Whether to stream partial message deltas}
+\item{\code{stop}}{Character string or list of strings. The API stops generating when
+any of these sequences are encountered. Maximum 4 stop sequences.
+Default: \code{NULL}.}
 
-\item{\code{stream_options}}{Options for streaming responses}
+\item{\code{stream}}{Logical. If \code{TRUE}, enables Server-Sent Events (SSE) streaming.
+\itemize{
+\item With \code{callback}: calls \code{callback(chunk)} for each delta chunk
+as it arrives. Returns \code{invisible(NULL)}.
+\item Without \code{callback}: assembles all chunks automatically and returns
+a standard response object (same structure as non-streaming).
+}
+Default: \code{NULL} (no streaming).}
 
-\item{\code{temperature}}{Sampling temperature (0 to 2)}
+\item{\code{stream_options}}{List of options for streaming. E.g.
+\code{list(include_usage=TRUE)} to receive token usage in the final chunk.
+Default: \code{NULL}.}
 
-\item{\code{top_p}}{Nucleus sampling parameter (0 to 1)}
+\item{\code{temperature}}{Numeric in \code{[0, 2]}. Controls randomness of output.
+\itemize{
+\item \code{0}: Nearly deterministic, best for factual tasks
+\item \code{0.7}: Balanced (recommended default)
+\item \code{1.5+}: Highly creative/random
+}
+Do not set both \code{temperature} and \code{top_p}. Default: \code{NULL} (API default 1).}
 
-\item{\code{tools}}{List of tools available}
+\item{\code{top_p}}{Numeric in \code{(0, 1]}. Nucleus sampling threshold.
+Only tokens whose cumulative probability mass reaches \code{top_p} are considered.
+E.g. \code{0.1} = only top 10\\% probability tokens. Alternative to \code{temperature}.
+Default: \code{NULL}.}
 
-\item{\code{tool_choice}}{Tool choice strategy}
+\item{\code{tools}}{List of tool definitions for function calling. Each tool is a named
+list with \code{type="function"} and a \code{function} field containing
+\code{name}, \code{description}, and \code{parameters} (JSON Schema).
+Default: \code{NULL}.}
 
-\item{\code{user}}{Unique identifier for end user}
+\item{\code{tool_choice}}{Controls which tool (if any) is called. Options:
+\itemize{
+\item \code{"none"}: Model generates a message, no tool called
+\item \code{"auto"}: Model decides whether to call a tool (default when tools present)
+\item \code{"required"}: Model must call at least one tool
+\item Named list: Force a specific function, e.g.
+\code{list(type="function", function=list(name="my_func"))}
+}
+Default: \code{NULL}.}
 
-\item{\code{...}}{Additional parameters}
+\item{\code{parallel_tool_calls}}{Logical. Whether to allow the model to call multiple
+tools in parallel. Default: \code{NULL} (API default \code{TRUE}).}
+
+\item{\code{user}}{Character string. A unique identifier for the end user, used by
+OpenAI for abuse detection. Default: \code{NULL}.}
+
+\item{\code{store}}{Logical. If \code{TRUE}, the completion is stored server-side and
+can be retrieved later via \code{$retrieve()}, \code{$list()}.
+Default: \code{NULL}.}
+
+\item{\code{metadata}}{Named list. Arbitrary key-value metadata attached to stored
+completions (requires \code{store=TRUE}). Default: \code{NULL}.}
+
+\item{\code{callback}}{Function with signature \code{function(chunk)} called for each
+SSE chunk when \code{stream=TRUE}. Access delta text via
+\code{chunk$choices[[1]]$delta$content}. Default: \code{NULL}.}
+
+\item{\code{...}}{Additional parameters passed directly to the API body.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-Chat completion response
+A named list representing the chat completion object:
+\describe{
+\item{\code{$id}}{Character. Unique completion ID, e.g. \code{"chatcmpl-abc123"}.}
+\item{\code{$object}}{Always \code{"chat.completion"}.}
+\item{\code{$created}}{Integer. Unix timestamp of creation.}
+\item{\code{$model}}{Character. Model actually used.}
+\item{\code{$choices}}{List of choice objects. Usually length 1 (unless \code{n > 1}).
+\describe{
+\item{\code{$choices[[1]]$message$role}}{Always \code{"assistant"}.}
+\item{\code{$choices[[1]]$message$content}}{Character. The generated text. \strong{This is the main output.}}
+\item{\code{$choices[[1]]$message$tool_calls}}{List. Tool calls made by the model (if any).}
+\item{\code{$choices[[1]]$finish_reason}}{Why generation stopped: \code{"stop"} (natural end),
+\code{"length"} (hit max_tokens), \code{"tool_calls"} (function calling),
+\code{"content_filter"}.}
 }
+}
+\item{\code{$usage}}{Token usage counts:
+\describe{
+\item{\code{$usage$prompt_tokens}}{Input tokens consumed.}
+\item{\code{$usage$completion_tokens}}{Output tokens generated.}
+\item{\code{$usage$total_tokens}}{Sum of above.}
+}
+}
+}
+When \code{stream=TRUE} with no callback, also includes \code{$.stream_iterator}
+(a \code{StreamIterator} object) for advanced chunk access.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+library(openaiR)
+client <- OpenAI$new(api_key = "sk-xxxxxx")
+
+# --- Basic single-turn chat ---
+response <- client$chat$completions$create(
+  messages = list(list(role = "user", content = "What is R?")),
+  model    = "gpt-4o"
+)
+cat(response$choices[[1]]$message$content)
+
+# --- Multi-turn conversation with system prompt ---
+response <- client$chat$completions$create(
+  messages = list(
+    list(role = "system",    content = "You are an econometrics expert."),
+    list(role = "user",      content = "Explain OLS assumptions briefly."),
+    list(role = "assistant", content = "OLS requires linearity, exogeneity..."),
+    list(role = "user",      content = "Give an R code example.")
+  ),
+  model       = "gpt-4o",
+  temperature = 0.3,
+  max_tokens  = 500
+)
+cat(response$choices[[1]]$message$content)
+
+# --- Streaming with real-time output ---
+client$chat$completions$create(
+  messages = list(list(role = "user", content = "Write a haiku")),
+  model    = "gpt-4o",
+  stream   = TRUE,
+  callback = function(chunk) {
+    delta <- chunk$choices[[1]]$delta$content
+    if (!is.null(delta)) cat(delta, sep = "")
+  }
+)
+
+# --- Streaming without callback (auto-assembled) ---
+response <- client$chat$completions$create(
+  messages = list(list(role = "user", content = "Tell me a story")),
+  model    = "gpt-4o",
+  stream   = TRUE
+)
+cat(response$choices[[1]]$message$content)
+
+# --- Force JSON output ---
+response <- client$chat$completions$create(
+  messages = list(
+    list(role = "user",
+         content = "List 3 ML algorithms in JSON with fields: name, use_case")
+  ),
+  model           = "gpt-4o",
+  response_format = list(type = "json_object")
+)
+result <- jsonlite::fromJSON(response$choices[[1]]$message$content)
+
+# --- Generate N candidates ---
+response <- client$chat$completions$create(
+  messages    = list(list(role = "user", content = "Suggest an article title on AI")),
+  model       = "gpt-4o",
+  n           = 3,
+  temperature = 1.2
+)
+for (i in seq_along(response$choices)) {
+  cat(i, ":", response$choices[[i]]$message$content, "\n")
+}
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ChatCompletionsClient-retrieve"></a>}}
+\if{latex}{\out{\hypertarget{method-ChatCompletionsClient-retrieve}{}}}
+\subsection{Method \code{retrieve()}}{
+Retrieve a stored chat completion by ID.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ChatCompletionsClient$retrieve(completion_id)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{completion_id}}{Character. The completion ID (e.g. from \code{response$id})
+of a previously created completion with \code{store=TRUE}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A chat completion list object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+stored <- client$chat$completions$retrieve("chatcmpl-abc123")
+cat(stored$choices[[1]]$message$content)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ChatCompletionsClient-update"></a>}}
+\if{latex}{\out{\hypertarget{method-ChatCompletionsClient-update}{}}}
+\subsection{Method \code{update()}}{
+Update the metadata of a stored chat completion.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ChatCompletionsClient$update(completion_id, metadata = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{completion_id}}{Character. Completion ID to update.}
+
+\item{\code{metadata}}{Named list. New metadata key-value pairs to attach.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Updated chat completion object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+client$chat$completions$update(
+  "chatcmpl-abc123",
+  metadata = list(project = "research", version = "v2")
+)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ChatCompletionsClient-list"></a>}}
+\if{latex}{\out{\hypertarget{method-ChatCompletionsClient-list}{}}}
+\subsection{Method \code{list()}}{
+List stored chat completions with optional filters.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ChatCompletionsClient$list(
+  model = NULL,
+  after = NULL,
+  limit = NULL,
+  order = NULL,
+  metadata = NULL
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{model}}{Character. Filter results to a specific model ID. Default: \code{NULL}.}
+
+\item{\code{after}}{Character. Pagination cursor — the ID of the last item from the
+previous page. Default: \code{NULL}.}
+
+\item{\code{limit}}{Integer. Number of completions to return per page (1-100).
+Default: \code{NULL} (API default 20).}
+
+\item{\code{order}}{Character. Sort order: \code{"asc"} or \code{"desc"} by creation time.
+Default: \code{NULL}.}
+
+\item{\code{metadata}}{List. Filter by metadata key-value pairs. Default: \code{NULL}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A list with \code{$data} (list of completion objects) and
+\code{$has_more} (logical).
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+page <- client$chat$completions$list(model = "gpt-4o", limit = 10)
+for (c in page$data) cat(c$id, "\n")
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ChatCompletionsClient-delete"></a>}}
+\if{latex}{\out{\hypertarget{method-ChatCompletionsClient-delete}{}}}
+\subsection{Method \code{delete()}}{
+Delete a stored chat completion.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ChatCompletionsClient$delete(completion_id)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{completion_id}}{Character. Completion ID to delete.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A deletion status list with \code{$deleted} (logical).
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+client$chat$completions$delete("chatcmpl-abc123")
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ChatCompletionsClient-clone"></a>}}

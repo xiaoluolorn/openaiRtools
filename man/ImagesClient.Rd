@@ -96,11 +96,11 @@ Create an edited image
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{image}}{Image to edit (file path or raw)}
+\item{\code{image}}{Image file path to edit}
 
 \item{\code{prompt}}{Text description of desired edit}
 
-\item{\code{mask}}{Mask for the edit (file path or raw)}
+\item{\code{mask}}{Mask file path (optional)}
 
 \item{\code{model}}{Model to use}
 
@@ -137,7 +137,7 @@ Create an image variation
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{image}}{Image to vary (file path or raw)}
+\item{\code{image}}{Image file path to vary}
 
 \item{\code{model}}{Model to use}
 

@@ -1,6 +1,6 @@
 Package: openaiR
 Title: R Client for OpenAI API
-Version: 0.2.0
+Version: 0.2.1
 Authors@R: 
     person("Xiaoluo", "Orn", , "xiaoluolorn@example.com", role = c("aut", "cre"))
 Description: Complete R implementation of OpenAI Python SDK. Provides full 

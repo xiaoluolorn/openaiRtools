@@ -56,7 +56,7 @@ Audio Transcriptions Client
 
 \item{\code{temperature}}{Sampling temperature}
 
-\item{\code{timestamp_granularies}}{List of timestamp granularities}
+\item{\code{timestamp_granularities}}{List of timestamp granularities}
 }
 \if{html}{\out{</div>}}
 }
