@@ -36,6 +36,7 @@ export(ResponsesClient)
 export(OpenAIError)
 export(OpenAIConnectionError)
 export(OpenAIAPIError)
+export(StreamIterator)
 
 # Convenience functions - Chat
 export(create_chat_completion)
