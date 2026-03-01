@@ -291,4 +291,4 @@ remotes::install_github("xiaoluolorn/openaiR", upgrade = "always")
 
 如有问题或建议，欢迎：
 - 提交 Issue: https://github.com/xiaoluolorn/openaiR/issues
-- 邮件联系：xiaoluolorn@example.com
+- 邮件联系：[EMAIL_ADDRESS]
