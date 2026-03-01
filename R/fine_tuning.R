@@ -7,10 +7,10 @@ FineTuningClient <- R6::R6Class(
   "FineTuningClient",
   public = list(
     client = NULL,
-    
+
     #' @field jobs Fine-tuning jobs interface
     jobs = NULL,
-    
+
     #' Initialize fine-tuning client
     #'
     #' @param parent Parent OpenAI client
@@ -28,11 +28,14 @@ FineTuningJobsClient <- R6::R6Class(
   "FineTuningJobsClient",
   public = list(
     client = NULL,
-    
+
+    #' @field checkpoints Checkpoints sub-client
+    checkpoints = NULL,
     initialize = function(parent) {
       self$client <- parent
+      self$checkpoints <- FineTuningCheckpointsClient$new(parent)
     },
-    
+
     #' Create a fine-tuning job
     #'
     #' @param training_file File ID for training data
@@ -42,27 +45,30 @@ FineTuningJobsClient <- R6::R6Class(
     #' @param validation_file File ID for validation data
     #' @param integrations List of integrations to enable
     #' @param seed Random seed
+    #' @param method Fine-tuning method (e.g., "supervised", "dpo")
     #' @return Fine-tuning job object
     create = function(training_file, model = "gpt-3.5-turbo",
                       hyperparameters = NULL,
                       suffix = NULL,
                       validation_file = NULL,
                       integrations = NULL,
-                      seed = NULL) {
+                      seed = NULL,
+                      method = NULL) {
       body <- list(
         training_file = training_file,
         model = model
       )
-      
+
       if (!is.null(hyperparameters)) body$hyperparameters <- hyperparameters
       if (!is.null(suffix)) body$suffix <- suffix
       if (!is.null(validation_file)) body$validation_file <- validation_file
       if (!is.null(integrations)) body$integrations <- integrations
       if (!is.null(seed)) body$seed <- seed
-      
+      if (!is.null(method)) body$method <- method
+
       self$client$request("POST", "/fine_tuning/jobs", body = body)
     },
-    
+
     #' List fine-tuning jobs
     #'
     #' @param after Identifier for the last job from previous request
@@ -72,10 +78,10 @@ FineTuningJobsClient <- R6::R6Class(
       query <- list()
       if (!is.null(after)) query$after <- after
       if (!is.null(limit)) query$limit <- limit
-      
+
       self$client$request("GET", "/fine_tuning/jobs", query = query)
     },
-    
+
     #' Retrieve a fine-tuning job
     #'
     #' @param fine_tuning_job_id Fine-tuning job ID
@@ -83,7 +89,7 @@ FineTuningJobsClient <- R6::R6Class(
     retrieve = function(fine_tuning_job_id) {
       self$client$request("GET", paste0("/fine_tuning/jobs/", fine_tuning_job_id))
     },
-    
+
     #' Cancel a fine-tuning job
     #'
     #' @param fine_tuning_job_id Fine-tuning job ID
@@ -91,7 +97,7 @@ FineTuningJobsClient <- R6::R6Class(
     cancel = function(fine_tuning_job_id) {
       self$client$request("POST", paste0("/fine_tuning/jobs/", fine_tuning_job_id, "/cancel"))
     },
-    
+
     #' List fine-tuning events
     #'
     #' @param fine_tuning_job_id Fine-tuning job ID
@@ -102,10 +108,45 @@ FineTuningJobsClient <- R6::R6Class(
       query <- list()
       if (!is.null(after)) query$after <- after
       if (!is.null(limit)) query$limit <- limit
-      
+
       self$client$request(
         "GET",
         paste0("/fine_tuning/jobs/", fine_tuning_job_id, "/events"),
+        query = query
+      )
+    }
+  )
+)
+
+#' Fine-tuning Checkpoints Client
+#'
+#' @export
+FineTuningCheckpointsClient <- R6::R6Class(
+  "FineTuningCheckpointsClient",
+  public = list(
+    client = NULL,
+
+    #' Initialize checkpoints client
+    #'
+    #' @param parent Parent OpenAI client
+    initialize = function(parent) {
+      self$client <- parent
+    },
+
+    #' List fine-tuning job checkpoints
+    #'
+    #' @param fine_tuning_job_id Fine-tuning job ID
+    #' @param after Identifier for the last checkpoint from previous request
+    #' @param limit Number of checkpoints to retrieve
+    #' @return List of checkpoints
+    list = function(fine_tuning_job_id, after = NULL, limit = NULL) {
+      query <- list()
+      if (!is.null(after)) query$after <- after
+      if (!is.null(limit)) query$limit <- limit
+
+      self$client$request(
+        "GET",
+        paste0("/fine_tuning/jobs/", fine_tuning_job_id, "/checkpoints"),
         query = query
       )
     }
@@ -163,4 +204,15 @@ cancel_fine_tuning_job <- function(fine_tuning_job_id) {
 list_fine_tuning_events <- function(fine_tuning_job_id, ...) {
   client <- OpenAI$new()
   client$fine_tuning$jobs$list_events(fine_tuning_job_id, ...)
+}
+
+#' List fine-tuning checkpoints (convenience function)
+#'
+#' @param fine_tuning_job_id Job ID
+#' @param ... Additional parameters
+#' @return List of checkpoints
+#' @export
+list_fine_tuning_checkpoints <- function(fine_tuning_job_id, ...) {
+  client <- OpenAI$new()
+  client$fine_tuning$jobs$checkpoints$list(fine_tuning_job_id, ...)
 }

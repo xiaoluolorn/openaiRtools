@@ -48,7 +48,6 @@ cache/
 # Build artifacts
 inst/doc/
 man/*.Rd
-NAMESPACE
 
 # Coverage
 covr/

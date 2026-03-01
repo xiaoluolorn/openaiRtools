@@ -7,16 +7,16 @@ AudioClient <- R6::R6Class(
   "AudioClient",
   public = list(
     client = NULL,
-    
+
     #' @field transcriptions Audio transcription interface
     transcriptions = NULL,
-    
+
     #' @field translations Audio translation interface
     translations = NULL,
-    
+
     #' @field speech Text-to-speech interface
     speech = NULL,
-    
+
     #' Initialize audio client
     #'
     #' @param parent Parent OpenAI client
@@ -36,11 +36,10 @@ AudioTranscriptionsClient <- R6::R6Class(
   "AudioTranscriptionsClient",
   public = list(
     client = NULL,
-    
     initialize = function(parent) {
       self$client <- parent
     },
-    
+
     #' Transcribe audio to text
     #'
     #' @param file Audio file path
@@ -49,7 +48,7 @@ AudioTranscriptionsClient <- R6::R6Class(
     #' @param prompt Optional text to guide transcription
     #' @param response_format Response format ("json", "text", "srt", "verbose_json", "vtt")
     #' @param temperature Sampling temperature
-    #' @param timestamp_granularies List of timestamp granularities
+    #' @param timestamp_granularities List of timestamp granularities
     #' @return Transcription response
     create = function(file, model = "whisper-1",
                       language = NULL,
@@ -57,40 +56,24 @@ AudioTranscriptionsClient <- R6::R6Class(
                       response_format = NULL,
                       temperature = NULL,
                       timestamp_granularities = NULL) {
-      req <- httr2::request(paste0(self$client$base_url, "/audio/transcriptions"))
-      req <- httr2::req_method(req, "POST")
-      req <- httr2::req_headers(req,
-        "Authorization" = paste("Bearer", self$client$api_key),
-        "OpenAI-Beta" = "assistants=v2"
+      # Build multipart params
+      params <- list(
+        file = httr2::curl_file(file),
+        model = model
       )
-      
-      if (!is.null(self$client$organization)) {
-        req <- httr2::req_headers(req, "OpenAI-Organization" = self$client$organization)
-      }
-      
-      # Add audio file
-      req <- httr2::req_body_multipart(req, file = httr2::curl_file(file))
-      req <- httr2::req_body_multipart(req, model = model)
-      
-      # Add optional parameters
-      if (!is.null(language)) {
-        req <- httr2::req_body_multipart(req, language = language)
-      }
-      if (!is.null(prompt)) {
-        req <- httr2::req_body_multipart(req, prompt = prompt)
-      }
-      if (!is.null(response_format)) {
-        req <- httr2::req_body_multipart(req, response_format = response_format)
-      }
-      if (!is.null(temperature)) {
-        req <- httr2::req_body_multipart(req, temperature = as.character(temperature))
-      }
+
+      if (!is.null(language)) params$language <- language
+      if (!is.null(prompt)) params$prompt <- prompt
+      if (!is.null(response_format)) params$response_format <- response_format
+      if (!is.null(temperature)) params$temperature <- as.character(temperature)
       if (!is.null(timestamp_granularities)) {
-        req <- httr2::req_body_multipart(req, timestamp_granularities = I(jsonlite::toJSON(timestamp_granularities)))
+        params$timestamp_granularities <- I(jsonlite::toJSON(timestamp_granularities))
       }
-      
-      resp <- httr2::req_perform(req)
-      handle_response(resp)
+
+      do.call(
+        self$client$request_multipart,
+        c(list(method = "POST", path = "/audio/transcriptions"), params)
+      )
     }
   )
 )
@@ -102,11 +85,10 @@ AudioTranslationsClient <- R6::R6Class(
   "AudioTranslationsClient",
   public = list(
     client = NULL,
-    
     initialize = function(parent) {
       self$client <- parent
     },
-    
+
     #' Translate audio to English text
     #'
     #' @param file Audio file path
@@ -119,34 +101,19 @@ AudioTranslationsClient <- R6::R6Class(
                       prompt = NULL,
                       response_format = NULL,
                       temperature = NULL) {
-      req <- httr2::request(paste0(self$client$base_url, "/audio/translations"))
-      req <- httr2::req_method(req, "POST")
-      req <- httr2::req_headers(req,
-        "Authorization" = paste("Bearer", self$client$api_key),
-        "OpenAI-Beta" = "assistants=v2"
+      params <- list(
+        file = httr2::curl_file(file),
+        model = model
       )
-      
-      if (!is.null(self$client$organization)) {
-        req <- httr2::req_headers(req, "OpenAI-Organization" = self$client$organization)
-      }
-      
-      # Add audio file
-      req <- httr2::req_body_multipart(req, file = httr2::curl_file(file))
-      req <- httr2::req_body_multipart(req, model = model)
-      
-      # Add optional parameters
-      if (!is.null(prompt)) {
-        req <- httr2::req_body_multipart(req, prompt = prompt)
-      }
-      if (!is.null(response_format)) {
-        req <- httr2::req_body_multipart(req, response_format = response_format)
-      }
-      if (!is.null(temperature)) {
-        req <- httr2::req_body_multipart(req, temperature = as.character(temperature))
-      }
-      
-      resp <- httr2::req_perform(req)
-      handle_response(resp)
+
+      if (!is.null(prompt)) params$prompt <- prompt
+      if (!is.null(response_format)) params$response_format <- response_format
+      if (!is.null(temperature)) params$temperature <- as.character(temperature)
+
+      do.call(
+        self$client$request_multipart,
+        c(list(method = "POST", path = "/audio/translations"), params)
+      )
     }
   )
 )
@@ -158,11 +125,10 @@ SpeechClient <- R6::R6Class(
   "SpeechClient",
   public = list(
     client = NULL,
-    
     initialize = function(parent) {
       self$client <- parent
     },
-    
+
     #' Generate speech from text
     #'
     #' @param input Text to synthesize
@@ -180,38 +146,12 @@ SpeechClient <- R6::R6Class(
         model = model,
         voice = voice
       )
-      
+
       if (!is.null(response_format)) body$response_format <- response_format
       if (!is.null(speed)) body$speed <- speed
-      
-      req <- httr2::request(paste0(self$client$base_url, "/audio/speech"))
-      req <- httr2::req_method(req, "POST")
-      req <- httr2::req_headers(req,
-        "Authorization" = paste("Bearer", self$client$api_key),
-        "Content-Type" = "application/json",
-        "OpenAI-Beta" = "assistants=v2"
-      )
-      
-      if (!is.null(self$client$organization)) {
-        req <- httr2::req_headers(req, "OpenAI-Organization" = self$client$organization)
-      }
-      
-      req <- httr2::req_body_json(req, body)
-      
-      resp <- tryCatch(
-        {
-          httr2::req_perform(req)
-        },
-        error = function(e) {
-          OpenAIConnectionError(
-            sprintf("Failed to connect to OpenAI API: %s", e$message),
-            parent = e
-          )
-        }
-      )
-      
-      # Return raw content for audio
-      resp$body
+
+      # Use request_raw to get binary audio data
+      self$client$request_raw("POST", "/audio/speech", body = body)
     }
   )
 )

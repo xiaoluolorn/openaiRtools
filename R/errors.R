@@ -7,6 +7,14 @@
 #' @keywords internal
 NULL
 
+#' Helper function to check NULL
+#'
+#' @param a Value to check
+#' @param b Default value
+#' @return a if not NULL, otherwise b
+#' @keywords internal
+`%||%` <- function(a, b) if (is.null(a)) b else a
+
 #' Base OpenAI Error
 #'
 #' @param message Error message
@@ -42,14 +50,6 @@ OpenAIAPIError <- function(message, status_code = NULL, response = NULL, ...) {
   )
 }
 
-#' Check if value is NULL and return default
-#'
-#' @param a Value to check
-#' @param b Default value
-#' @return a if not NULL, otherwise b
-#' @keywords internal
-`%||%` <- function(a, b) if (is.null(a)) b else a
-
 #' Handle HTTP response and raise appropriate errors
 #'
 #' @param resp HTTP response object from httr2
@@ -57,28 +57,28 @@ OpenAIAPIError <- function(message, status_code = NULL, response = NULL, ...) {
 #' @keywords internal
 handle_response <- function(resp) {
   status_code <- httr2::resp_status(resp)
-  
+
   if (status_code >= 400) {
     body <- tryCatch(
-      jsonlite::fromJSON(rawToChar(resp$body), simplifyVector = FALSE),
+      httr2::resp_body_json(resp, simplifyVector = FALSE),
       error = function(e) NULL
     )
-    
+
     error_message <- if (!is.null(body) && !is.null(body$error$message)) {
       body$error$message
     } else {
-      httr2::resp_status_desc(resp) %||% "Unknown error"
+      tryCatch(httr2::resp_status_desc(resp), error = function(e) "Unknown error")
     }
-    
+
     OpenAIAPIError(
       message = sprintf("OpenAI API error: %s (HTTP %d)", error_message, status_code),
       status_code = status_code,
       response = resp
     )
   }
-  
+
   # Parse JSON response
-  jsonlite::fromJSON(rawToChar(resp$body), simplifyVector = FALSE)
+  httr2::resp_body_json(resp, simplifyVector = FALSE)
 }
 
 #' Handle streaming response from OpenAI API
@@ -90,37 +90,45 @@ handle_response <- function(resp) {
 handle_stream_response <- function(req, callback = NULL) {
   chunks <- list()
   has_callback <- !is.null(callback)
-  
+  buffer <- ""
+
   # Perform streaming request using httr2's streaming API
-  resp <- httr2::req_perform_stream(
+  httr2::req_perform_stream(
     req,
     callback = function(chunk) {
       if (length(chunk) > 0) {
-        text <- rawToChar(chunk)
+        text <- paste0(buffer, rawToChar(chunk))
+        buffer <<- ""
         lines <- strsplit(text, "\n")[[1]]
-        
+
+        # If the last line doesn't end with newline, it's incomplete - buffer it
+        if (!endsWith(text, "\n") && length(lines) > 0) {
+          buffer <<- lines[length(lines)]
+          lines <- lines[-length(lines)]
+        }
+
         for (line in lines) {
           # Skip empty lines
           if (trimws(line) == "") next
-          
+
           # Parse SSE data lines
           if (startsWith(line, "data: ")) {
             data_str <- substring(line, 7)
-            
+
             # Check for end of stream
             if (trimws(data_str) == "[DONE]") {
-              return(invisible(FALSE))  # Stop streaming
+              next
             }
-            
+
             # Parse JSON
             tryCatch(
               {
                 data_json <- jsonlite::fromJSON(data_str, simplifyVector = FALSE)
-                
+
                 if (!has_callback) {
                   chunks[[length(chunks) + 1]] <<- data_json
                 }
-                
+
                 # Call user callback if provided
                 if (has_callback) {
                   callback(data_json)
@@ -133,10 +141,10 @@ handle_stream_response <- function(req, callback = NULL) {
           }
         }
       }
-      invisible(TRUE)  # Continue streaming
+      invisible(TRUE) # Continue streaming
     }
   )
-  
+
   # Return appropriate result
   if (has_callback) {
     invisible(NULL)
@@ -156,17 +164,17 @@ StreamIterator <- R6::R6Class(
   public = list(
     #' @field chunks List of all chunks
     chunks = NULL,
-    
+
     #' @field current_index Current position in iteration
     current_index = 0,
-    
+
     #' Initialize stream iterator
     #' @param chunks List of parsed SSE chunks
     initialize = function(chunks) {
       self$chunks <- chunks
       self$current_index <- 0
     },
-    
+
     #' Get next chunk
     #' @return Next chunk or NULL if end of stream
     next_chunk = function() {
@@ -176,24 +184,24 @@ StreamIterator <- R6::R6Class(
       }
       self$chunks[[self$current_index]]
     },
-    
+
     #' Check if there are more chunks
     #' @return TRUE if more chunks available
     has_more = function() {
       self$current_index < length(self$chunks)
     },
-    
+
     #' Reset iterator to beginning
     reset = function() {
       self$current_index <- 0
     },
-    
+
     #' Get all chunks as list
     #' @return List of all chunks
     as_list = function() {
       self$chunks
     },
-    
+
     #' Get full text by concatenating all content deltas
     #' @return Complete text content
     get_full_text = function() {

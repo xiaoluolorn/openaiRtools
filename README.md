@@ -14,12 +14,25 @@
 
 `openaiR` provides full compatibility with the OpenAI Python SDK, including:
 
-- ✅ **Chat Completions** - GPT-4, GPT-3.5-Turbo, and more
+- ✅ **Chat Completions** - GPT-4o, GPT-4, GPT-3.5-Turbo (create, retrieve, list, update, delete)
 - ✅ **Embeddings** - Text embedding models
-- ✅ **Images** - DALL-E 3 and DALL-E 2
+- ✅ **Images** - DALL-E 3 and DALL-E 2 (generate, edit, variation)
 - ✅ **Audio** - Whisper transcriptions, translations, and TTS
-- ✅ **Models** - List and retrieve model information
-- ✅ **Fine-tuning** - Create and manage fine-tuning jobs
+- ✅ **Models** - List, retrieve, and delete models
+- ✅ **Fine-tuning** - Jobs, events, and checkpoints
+- ✅ **Files** - Upload, list, retrieve, delete, and content
+- ✅ **Moderations** - Content moderation
+- ✅ **Completions** - Legacy completions API
+- ✅ **Batch** - Batch processing API
+- ✅ **Uploads** - Large file upload in parts
+- ✅ **Assistants** - AI assistants (Beta v2)
+- ✅ **Threads** - Conversation threads with runs and messages (Beta v2)
+- ✅ **Vector Stores** - File search with vector stores (Beta v2)
+- ✅ **Responses** - New unified response API
+- ✅ **Streaming** - Server-Sent Events (SSE) streaming
+- ✅ **Multimodal** - Vision and image content helpers
+- ✅ **Auto-retry** - Automatic retry with exponential backoff
+- ✅ **Custom Base URL** - Compatible with OpenAI-format APIs
 
 ## Installation
 
@@ -52,6 +65,16 @@ client <- OpenAI$new(api_key = "your-api-key-here")
 # Or set environment variable (recommended)
 Sys.setenv(OPENAI_API_KEY = "your-api-key-here")
 client <- OpenAI$new()
+
+# With custom options
+client <- OpenAI$new(
+  api_key = "your-key",
+  base_url = "https://api.openai.com/v1",  # or compatible API
+  organization = "org-123",
+  project = "proj-456",
+  timeout = 600,
+  max_retries = 2
+)
 ```
 
 ### Chat Completions
@@ -62,10 +85,23 @@ response <- client$chat$completions$create(
   messages = list(
     list(role = "user", content = "Hello, how are you?")
   ),
-  model = "gpt-4"
+  model = "gpt-4o"
 )
 
 print(response$choices[[1]]$message$content)
+
+# With stored completions
+response <- client$chat$completions$create(
+  messages = list(list(role = "user", content = "Hello")),
+  model = "gpt-4o",
+  store = TRUE
+)
+
+# Retrieve a stored completion
+stored <- client$chat$completions$retrieve(response$id)
+
+# List stored completions
+completions <- client$chat$completions$list(model = "gpt-4o", limit = 10)
 
 # Or using convenience function
 response <- create_chat_completion(
@@ -103,6 +139,13 @@ response <- client$images$create(
 
 # Get image URL
 print(response$data[[1]]$url)
+
+# Edit an image
+response <- client$images$edit(
+  image = "original.png",
+  prompt = "Add a red hat",
+  mask = "mask.png"
+)
 ```
 
 ### Audio
@@ -155,6 +198,26 @@ jobs <- client$fine_tuning$jobs$list()
 
 # Get job status
 job_status <- client$fine_tuning$jobs$retrieve(job$id)
+
+# List checkpoints
+checkpoints <- client$fine_tuning$jobs$checkpoints$list(job$id)
+```
+
+### Responses API (New)
+
+```r
+# Create a response
+response <- client$responses$create(
+  model = "gpt-4o",
+  input = "Write a haiku about R programming"
+)
+
+# Multi-turn conversation
+response2 <- client$responses$create(
+  model = "gpt-4o",
+  input = "Make it more technical",
+  previous_response_id = response$id
+)
 ```
 
 ## Advanced Usage
@@ -162,15 +225,29 @@ job_status <- client$fine_tuning$jobs$retrieve(job$id)
 ### Streaming Responses
 
 ```r
-response <- client$chat$completions$create(
+# Stream with callback
+client$chat$completions$create(
   messages = list(
     list(role = "user", content = "Tell me a story")
   ),
-  model = "gpt-4",
+  model = "gpt-4o",
+  stream = TRUE,
+  callback = function(chunk) {
+    content <- chunk$choices[[1]]$delta$content
+    if (!is.null(content)) cat(content)
+  }
+)
+
+# Stream without callback - returns iterator
+iter <- client$chat$completions$create(
+  messages = list(list(role = "user", content = "Count to 10")),
+  model = "gpt-4o",
   stream = TRUE
 )
 
-# Handle streaming response (implementation pending)
+# Get full text from iterator
+full_text <- iter$get_full_text()
+cat(full_text)
 ```
 
 ### Function Calling
@@ -200,8 +277,29 @@ response <- client$chat$completions$create(
   messages = list(
     list(role = "user", content = "What's the weather in Boston?")
   ),
-  model = "gpt-4",
+  model = "gpt-4o",
   tools = tools
+)
+```
+
+### Multimodal (Vision)
+
+```r
+# Using helper functions
+msg <- create_multimodal_message(
+  text = "Describe this image",
+  images = list("https://example.com/image.jpg")
+)
+
+response <- client$chat$completions$create(
+  messages = list(msg),
+  model = "gpt-4o"
+)
+
+# Or use local files
+msg <- create_multimodal_message(
+  text = "What do you see?",
+  images = list("path/to/image.jpg")
 )
 ```
 
@@ -222,18 +320,6 @@ client <- OpenAI$new(
 - `OPENAI_API_KEY` - Your OpenAI API key (required)
 - `OPENAI_ORG_ID` - Organization ID (optional)
 - `OPENAI_PROJECT_ID` - Project ID (optional)
-
-### Client Options
-
-```r
-client <- OpenAI$new(
-  api_key = "your-key",
-  base_url = "https://api.openai.com/v1",
-  organization = "org-123",  # Optional
-  project = "proj-456",      # Optional
-  timeout = 600              # Request timeout in seconds
-)
-```
 
 ## Error Handling
 
@@ -280,7 +366,6 @@ testthat::test_file("tests/testthat/test-chat.R")
 - `httr2` - HTTP requests
 - `jsonlite` - JSON parsing
 - `rlang` - Error handling
-- `cli` - CLI utilities
 - `glue` - String interpolation
 - `R6` - Object-oriented programming
 
@@ -288,7 +373,7 @@ testthat::test_file("tests/testthat/test-chat.R")
 
 ```r
 # Install dependencies
-install.packages(c("httr2", "jsonlite", "rlang", "cli", "glue", "R6", "devtools"))
+install.packages(c("httr2", "jsonlite", "rlang", "glue", "R6", "devtools"))
 
 # Build package
 devtools::load_all()

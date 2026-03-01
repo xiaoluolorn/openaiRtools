@@ -8,14 +8,14 @@ UploadsClient <- R6::R6Class(
   "UploadsClient",
   public = list(
     client = NULL,
-    
+
     #' Initialize uploads client
     #'
     #' @param parent Parent OpenAI client
     initialize = function(parent) {
       self$client <- parent
     },
-    
+
     #' Create an upload
     #'
     #' @param purpose Upload purpose: "assistants", "batch", "fine-tune"
@@ -29,34 +29,25 @@ UploadsClient <- R6::R6Class(
         filename = filename,
         bytes = bytes
       )
-      
+
       if (!is.null(mime_type)) body$mime_type <- mime_type
-      
+
       self$client$request("POST", "/uploads", body = body)
     },
-    
+
     #' Add a part to an upload
     #'
     #' @param upload_id Upload ID
     #' @param data Raw data for this part
     #' @return Upload part object
     add_part = function(upload_id, data) {
-      req <- httr2::request(paste0(self$client$base_url, "/uploads/", upload_id, "/parts"))
-      req <- httr2::req_method(req, "POST")
-      req <- httr2::req_headers(req,
-        "Authorization" = paste("Bearer", self$client$api_key)
+      self$client$request_multipart(
+        "POST",
+        paste0("/uploads/", upload_id, "/parts"),
+        data = data
       )
-      
-      if (!is.null(self$client$organization)) {
-        req <- httr2::req_headers(req, "OpenAI-Organization" = self$client$organization)
-      }
-      
-      req <- httr2::req_body_multipart(req, data = data)
-      
-      resp <- httr2::req_perform(req)
-      handle_response(resp)
     },
-    
+
     #' Complete an upload
     #'
     #' @param upload_id Upload ID
@@ -67,12 +58,12 @@ UploadsClient <- R6::R6Class(
       body <- list(
         part_ids = part_ids
       )
-      
+
       if (!is.null(md5)) body$md5 <- md5
-      
+
       self$client$request("POST", paste0("/uploads/", upload_id, "/complete"), body = body)
     },
-    
+
     #' Cancel an upload
     #'
     #' @param upload_id Upload ID
