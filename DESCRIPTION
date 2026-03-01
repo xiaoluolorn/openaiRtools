@@ -1,5 +1,5 @@
 Package: openaiR
-Title: R Client for OpenAI API
+Title: R Client for the 'OpenAI' API
 Version: 0.2.2
 Authors@R: 
     person("Chaoyang", "Luo", email = "[EMAIL_ADDRESS]", role = c("aut", "cre"))
@@ -7,7 +7,7 @@ Description: Complete R implementation of OpenAI Python SDK. Provides full
     compatibility with OpenAI API including chat completions, embeddings, 
     images, audio, fine-tuning, and model management.
 License: MIT + file LICENSE
-URL: http://github.com/xiaoluolorn/openaiR
+URL: https://github.com/xiaoluolorn/openaiR
 BugReports: https://github.com/xiaoluolorn/openaiR/issues
 Depends: 
     R (>= 4.0.0)
@@ -16,7 +16,8 @@ Imports:
     httr2,
     jsonlite,
     rlang,
-    glue
+    glue,
+    tools
 Suggests: 
     testthat (>= 3.0.0),
     knitr,
