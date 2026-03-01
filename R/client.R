@@ -49,6 +49,33 @@ OpenAI <- R6Class(
     #' @field fine_tuning Fine-tuning client
     fine_tuning = NULL,
     
+    #' @field files Files client
+    files = NULL,
+    
+    #' @field moderations Moderations client
+    moderations = NULL,
+    
+    #' @field completions Completions client (legacy)
+    completions = NULL,
+    
+    #' @field batch Batch client
+    batch = NULL,
+    
+    #' @field uploads Uploads client
+    uploads = NULL,
+    
+    #' @field assistants Assistants client (beta)
+    assistants = NULL,
+    
+    #' @field threads Threads client (beta)
+    threads = NULL,
+    
+    #' @field vector_stores Vector stores client (beta)
+    vector_stores = NULL,
+    
+    #' @field responses Responses client
+    responses = NULL,
+    
     #' Initialize OpenAI client
     #'
     #' @param api_key OpenAI API key. If NULL, will use OPENAI_API_KEY env var.
@@ -79,6 +106,17 @@ OpenAI <- R6Class(
       self$audio <- AudioClient$new(self)
       self$models <- ModelsClient$new(self)
       self$fine_tuning <- FineTuningClient$new(self)
+      # New API sub-clients
+      self$files <- FilesClient$new(self)
+      self$moderations <- ModerationsClient$new(self)
+      self$completions <- CompletionsClient$new(self)
+      self$batch <- BatchClient$new(self)
+      self$uploads <- UploadsClient$new(self)
+      # Beta API sub-clients
+      self$assistants <- AssistantsClient$new(self)
+      self$threads <- ThreadsClient$new(self)
+      self$vector_stores <- VectorStoresClient$new(self)
+      self$responses <- ResponsesClient$new(self)
     },
     
     #' Make HTTP request to OpenAI API
