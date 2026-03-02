@@ -34,7 +34,7 @@ an image from a public web URL. The URL must be directly accessible
 }
 \examples{
 \dontrun{
-library(openaiR)
+library(openaiRtools)
 client <- OpenAI$new(api_key = "sk-xxxxxx")
 
 # Build an image part from a URL

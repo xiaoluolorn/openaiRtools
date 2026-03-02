@@ -9,7 +9,7 @@
 ^simple_test\.R$
 ^update_docs\.R$
 ^fix_roxygen_indent\.R$
-^openaiR\.Rcheck$
+^openaiRtools\.Rcheck$
 ^LICENSE\.md$
 ^\.Rhistory$
 ^.*\.tar\.gz$

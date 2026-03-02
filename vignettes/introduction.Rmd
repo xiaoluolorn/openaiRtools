@@ -1,8 +1,8 @@
 ---
-title: "Introduction to openaiR"
+title: "Introduction to openaiRtools"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction to openaiR}
+  %\VignetteIndexEntry{Introduction to openaiRtools}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -16,14 +16,14 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-`openaiR` is a complete R implementation of the OpenAI Python SDK, providing full compatibility with the OpenAI API. This package allows R users to access all OpenAI services including Chat Completions, Embeddings, Images (DALL-E), Audio (Whisper and TTS), Models, and Fine-tuning.
+`openaiRtools` is a complete R implementation of the OpenAI Python SDK, providing full compatibility with the OpenAI API. This package allows R users to access all OpenAI services including Chat Completions, Embeddings, Images (DALL-E), Audio (Whisper and TTS), Models, and Fine-tuning.
 
 ## Installation
 
 ```r
 # Install from GitHub
 install.packages("remotes")
-remotes::install_github("xiaoluolorn/openaiR")
+remotes::install_github("xiaoluolorn/openaiRtools")
 ```
 
 ## Quick Start
@@ -31,7 +31,7 @@ remotes::install_github("xiaoluolorn/openaiR")
 ### Setup
 
 ```{r setup, eval=FALSE}
-library(openaiR)
+library(openaiRtools)
 
 # Method 1: Set API key in environment (recommended)
 Sys.setenv(OPENAI_API_KEY = "your-api-key-here")
@@ -121,7 +121,7 @@ writeBin(audio_data, "speech.mp3")
 
 ### 1. Full API Compatibility
 
-`openaiR` implements all major OpenAI API endpoints:
+`openaiRtools` implements all major OpenAI API endpoints:
 
 - **Chat Completions**: GPT-4, GPT-3.5-Turbo, and more
 - **Embeddings**: Text embedding models
@@ -203,4 +203,4 @@ client <- OpenAI$new(
 - See `vignette("quickstart")` for more examples
 - Read `vignette("function-calling")` for advanced function calling
 - Check `vignette("error-handling")` for detailed error handling guide
-- Visit the [GitHub repository](https://github.com/xiaoluolorn/openaiR) for complete API details
+- Visit the [GitHub repository](https://github.com/xiaoluolorn/openaiRtools) for complete API details

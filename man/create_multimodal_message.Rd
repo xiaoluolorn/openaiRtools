@@ -50,7 +50,7 @@ Pass the returned object (or a list of such objects) directly to
 }
 \examples{
 \dontrun{
-library(openaiR)
+library(openaiRtools)
 client <- OpenAI$new(api_key = "sk-xxxxxx")
 
 # --- URL image ---

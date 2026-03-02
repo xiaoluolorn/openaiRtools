@@ -1,4 +1,4 @@
-# openaiR
+# openaiRtools
 
 <div align="center">
 
@@ -36,7 +36,7 @@
 
 ## 功能概述
 
-`openaiR` 提供与 OpenAI Python SDK 完全对应的 R 接口，涵盖所有主要 API 端点：
+`openaiRtools` 提供与 OpenAI Python SDK 完全对应的 R 接口，涵盖所有主要 API 端点：
 
 | 模块 | 功能 |
 |------|------|
@@ -60,7 +60,7 @@
 ```r
 # 从 GitHub 安装
 install.packages("remotes")
-remotes::install_github("xiaoluolorn/openaiR")
+remotes::install_github("xiaoluolorn/openaiRtools")
 
 # 安装依赖（如未安装）
 install.packages(c("httr2", "jsonlite", "rlang", "glue", "R6"))
@@ -118,7 +118,7 @@ client <- OpenAI$new(
 #### 使用示例
 
 ```r
-library(openaiR)
+library(openaiRtools)
 
 # 方式一：直接传入密钥
 client <- OpenAI$new(api_key = "sk-xxxxxx")
@@ -251,7 +251,7 @@ response$usage$total_tokens              # 总 token 数
 **案例 1：基础对话**
 
 ```r
-library(openaiR)
+library(openaiRtools)
 client <- OpenAI$new(api_key = "sk-xxxxxx")
 
 response <- client$chat$completions$create(
@@ -922,7 +922,7 @@ audio_data <- client$audio$speech$create(
 ```r
 # 生成中文语音
 audio_bytes <- client$audio$speech$create(
-  input  = "欢迎使用 openaiR，这是一个强大的 R 语言 OpenAI 接口库。",
+  input  = "欢迎使用 openaiRtools，这是一个强大的 R 语言 OpenAI 接口库。",
   model  = "tts-1-hd",
   voice  = "nova",
   speed  = 0.9

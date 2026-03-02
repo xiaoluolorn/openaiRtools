@@ -58,7 +58,7 @@ NULL
 #'
 #' @examples
 #' \dontrun{
-#' library(openaiR)
+#' library(openaiRtools)
 #' client <- OpenAI$new(api_key = "sk-xxxxxx")
 #'
 #' # Build an image part from a URL
@@ -130,7 +130,7 @@ image_from_url <- function(url, detail = "auto") {
 #'
 #' @examples
 #' \dontrun{
-#' library(openaiR)
+#' library(openaiRtools)
 #' client <- OpenAI$new(api_key = "sk-xxxxxx")
 #'
 #' # Send a local chart image
@@ -220,7 +220,7 @@ image_from_file <- function(file_path, mime_type = NULL, detail = "auto") {
 #'
 #' @examples
 #' \dontrun{
-#' library(openaiR)
+#' library(openaiRtools)
 #' library(ggplot2)
 #' client <- OpenAI$new(api_key = "sk-xxxxxx")
 #'
@@ -351,7 +351,7 @@ text_content <- function(text) {
 #'
 #' @examples
 #' \dontrun{
-#' library(openaiR)
+#' library(openaiRtools)
 #' client <- OpenAI$new(api_key = "sk-xxxxxx")
 #'
 #' # --- URL image ---

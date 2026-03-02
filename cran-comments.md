@@ -4,10 +4,10 @@
 
 ## Package Name Note
 
-This package name `openaiR` may appear to conflict with the existing CRAN
+This package name `openaiRtools` may appear to conflict with the existing CRAN
 package `openair`. However, the two packages serve entirely different purposes:
 
-- **openaiR**: An R client for the OpenAI API (GPT, DALL-E, Whisper, etc.)
+- **openaiRtools**: An R client for the OpenAI API (GPT, DALL-E, Whisper, etc.)
 - **openair**: Tools for air quality data analysis
 
 The naming follows the common R convention of appending "R" to indicate an

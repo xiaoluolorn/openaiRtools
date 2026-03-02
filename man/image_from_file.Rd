@@ -38,7 +38,7 @@ screenshots, or any image not accessible via a public URL.
 }
 \examples{
 \dontrun{
-library(openaiR)
+library(openaiRtools)
 client <- OpenAI$new(api_key = "sk-xxxxxx")
 
 # Send a local chart image

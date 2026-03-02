@@ -1,4 +1,4 @@
 library(testthat)
-library(openaiR)
+library(openaiRtools)
 
-test_check("openaiR")
+test_check("openaiRtools")

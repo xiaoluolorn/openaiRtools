@@ -1,4 +1,4 @@
-# openaiR 快速入门指南
+# openaiRtools 快速入门指南
 
 ## 1. 安装
 
@@ -8,8 +8,8 @@
 # 安装 remotes（如果尚未安装）
 install.packages("remotes")
 
-# 从 GitHub 安装 openaiR
-remotes::install_github("xiaoluolorn/openaiR")
+# 从 GitHub 安装 openaiRtools
+remotes::install_github("xiaoluolorn/openaiRtools")
 ```
 
 ## 2. 设置 API 密钥
@@ -28,7 +28,7 @@ Sys.setenv(OPENAI_API_KEY = "sk-your-api-key-here")
 ### 方法 2：直接传递
 
 ```r
-library(openaiR)
+library(openaiRtools)
 client <- OpenAI$new(api_key = "sk-your-api-key-here")
 ```
 
@@ -37,7 +37,7 @@ client <- OpenAI$new(api_key = "sk-your-api-key-here")
 ### 聊天补全
 
 ```r
-library(openaiR)
+library(openaiRtools)
 
 # 创建客户端
 client <- OpenAI$new()  # 会自动读取环境变量
@@ -141,7 +141,7 @@ cat("转录文本:", transcription$text)
 ```r
 # 生成语音
 audio_data <- client$audio$speech$create(
-  input = "你好，这是 openaiR 包的文本转语音功能测试",
+  input = "你好，这是 openaiRtools 包的文本转语音功能测试",
   model = "tts-1",
   voice = "alloy"
 )
@@ -267,7 +267,7 @@ Sys.setenv(OPENAI_API_KEY = "sk-...")
 A: 
 ```r
 # 查看包的帮助
-help(package = "openaiR")
+help(package = "openaiRtools")
 
 # 查看特定函数的帮助
 ?OpenAI
@@ -278,17 +278,17 @@ help(package = "openaiR")
 
 A:
 ```r
-remotes::install_github("xiaoluolorn/openaiR", upgrade = "always")
+remotes::install_github("xiaoluolorn/openaiRtools", upgrade = "always")
 ```
 
 ## 7. 下一步
 
-- 阅读完整文档：https://xiaoluolorn.github.io/openaiR/
-- 查看示例代码：`vignette("introduction", package = "openaiR")`
-- 报告问题：https://github.com/xiaoluolorn/openaiR/issues
+- 阅读完整文档：https://xiaoluolorn.github.io/openaiRtools/
+- 查看示例代码：`vignette("introduction", package = "openaiRtools")`
+- 报告问题：https://github.com/xiaoluolorn/openaiRtools/issues
 
 ## 8. 支持
 
 如有问题或建议，欢迎：
-- 提交 Issue: https://github.com/xiaoluolorn/openaiR/issues
+- 提交 Issue: https://github.com/xiaoluolorn/openaiRtools/issues
 - 邮件联系：xiaoluolorn@gmail.com

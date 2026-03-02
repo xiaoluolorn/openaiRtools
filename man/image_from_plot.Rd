@@ -33,7 +33,7 @@ This lets you analyze charts produced in R without saving them manually.
 }
 \examples{
 \dontrun{
-library(openaiR)
+library(openaiRtools)
 library(ggplot2)
 client <- OpenAI$new(api_key = "sk-xxxxxx")
 

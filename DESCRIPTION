@@ -1,4 +1,4 @@
-Package: openaiR
+Package: openaiRtools
 Title: R Client for the 'OpenAI' API
 Version: 0.2.2
 Authors@R: 

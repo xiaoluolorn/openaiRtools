@@ -1,4 +1,4 @@
-# openaiR
+# openaiRtools
 
 <div align="center">
 
@@ -38,7 +38,7 @@
 
 ## Feature Overview
 
-`openaiR` provides an R interface that directly maps to the OpenAI Python SDK, covering all major API endpoints:
+`openaiRtools` provides an R interface that directly maps to the OpenAI Python SDK, covering all major API endpoints:
 
 | Module | Functionality |
 |------|------|
@@ -62,7 +62,7 @@
 ```r
 # Install from GitHub
 install.packages("remotes")
-remotes::install_github("xiaoluolorn/openaiR")
+remotes::install_github("xiaoluolorn/openaiRtools")
 
 # Install dependencies (if not already installed)
 install.packages(c("httr2", "jsonlite", "rlang", "glue", "R6"))
@@ -120,7 +120,7 @@ Returns an `OpenAI` R6 object containing the following sub-client fields:
 #### Usage Example
 
 ```r
-library(openaiR)
+library(openaiRtools)
 
 # Option 1: Pass key directly
 client <- OpenAI$new(api_key = "sk-xxxxxx")
@@ -253,7 +253,7 @@ response$usage$total_tokens              # Total tokens
 **Case 1: Basic Conversation**
 
 ```r
-library(openaiR)
+library(openaiRtools)
 client <- OpenAI$new(api_key = "sk-xxxxxx")
 
 response <- client$chat$completions$create(

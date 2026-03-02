@@ -195,7 +195,7 @@ ChatCompletionsClient <- R6::R6Class(
     #
     # @examples
     # \dontrun{
-    # library(openaiR)
+    # library(openaiRtools)
     # client <- OpenAI$new(api_key = "sk-xxxxxx")
     #
     # # --- Basic single-turn chat ---
