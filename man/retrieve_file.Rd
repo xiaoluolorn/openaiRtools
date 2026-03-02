@@ -2,16 +2,27 @@
 % Please edit documentation in R/files.R
 \name{retrieve_file}
 \alias{retrieve_file}
-\title{Retrieve a file (convenience function)}
+\title{Retrieve File Metadata (Convenience Function)}
 \usage{
 retrieve_file(file_id)
 }
 \arguments{
-\item{file_id}{File ID}
+\item{file_id}{Character. \strong{Required.} The file ID (e.g. \code{"file-abc123"}).}
 }
 \value{
-File object
+A file object with \verb{$id}, \verb{$filename}, \verb{$bytes}, \verb{$purpose},
+\verb{$status}, and \verb{$created_at}.
 }
 \description{
-Retrieve a file (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and retrieves metadata for a specific file.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+info <- retrieve_file("file-abc123")
+cat("Filename:", info$filename)
+cat("Status:", info$status) # "processed"
+}
 }

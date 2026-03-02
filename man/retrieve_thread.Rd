@@ -2,16 +2,24 @@
 % Please edit documentation in R/threads.R
 \name{retrieve_thread}
 \alias{retrieve_thread}
-\title{Retrieve a thread (convenience function)}
+\title{Retrieve a Thread (Convenience Function)}
 \usage{
 retrieve_thread(thread_id)
 }
 \arguments{
-\item{thread_id}{Thread ID}
+\item{thread_id}{Character. \strong{Required.} The thread ID to retrieve.}
 }
 \value{
-Thread object
+A thread object with \verb{$id}, \verb{$created_at}, and \verb{$metadata}.
 }
 \description{
-Retrieve a thread (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and retrieves a thread.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+thread <- retrieve_thread("thread_abc123")
+cat("Created at:", thread$created_at)
+}
 }

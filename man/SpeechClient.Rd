@@ -2,11 +2,10 @@
 % Please edit documentation in R/audio.R
 \name{SpeechClient}
 \alias{SpeechClient}
-\title{Speech Client}
+\title{Speech Client (Text-to-Speech)}
 \description{
-Speech Client
-
-Speech Client
+Converts text to spoken audio using OpenAI's TTS models.
+Access via \code{client$audio$speech}.
 }
 \section{Methods}{
 \subsection{Public methods}{

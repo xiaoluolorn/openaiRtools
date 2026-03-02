@@ -2,18 +2,33 @@
 % Please edit documentation in R/assistants.R
 \name{update_assistant}
 \alias{update_assistant}
-\title{Update an assistant (convenience function)}
+\title{Update an Assistant (Convenience Function)}
 \usage{
 update_assistant(assistant_id, ...)
 }
 \arguments{
-\item{assistant_id}{Assistant ID}
+\item{assistant_id}{Character. \strong{Required.} The ID of the assistant to update.}
 
-\item{...}{Fields to update}
+\item{...}{Named fields to update. Supported: \code{name}, \code{description},
+\code{instructions}, \code{model}, \code{tools}, \code{tool_resources}, \code{metadata},
+\code{temperature}, \code{response_format}.}
 }
 \value{
-Updated assistant
+The updated assistant object.
 }
 \description{
-Update an assistant (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and updates an existing assistant.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+updated <- update_assistant(
+  "asst_abc123",
+  instructions = "You are now an expert in time series analysis.",
+  model        = "gpt-4o"
+)
+cat("Updated model:", updated$model)
+}
 }

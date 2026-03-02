@@ -4,9 +4,9 @@
 \alias{FineTuningCheckpointsClient}
 \title{Fine-tuning Checkpoints Client}
 \description{
-Fine-tuning Checkpoints Client
-
-Fine-tuning Checkpoints Client
+Retrieves intermediate model checkpoints created during fine-tuning.
+A checkpoint is saved after each training epoch. Access via
+\code{client$fine_tuning$jobs$checkpoints}.
 }
 \section{Methods}{
 \subsection{Public methods}{

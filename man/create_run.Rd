@@ -2,20 +2,41 @@
 % Please edit documentation in R/threads.R
 \name{create_run}
 \alias{create_run}
-\title{Create a run (convenience function)}
+\title{Create a Run (Convenience Function)}
 \usage{
 create_run(thread_id, assistant_id, ...)
 }
 \arguments{
-\item{thread_id}{Thread ID}
+\item{thread_id}{Character. \strong{Required.} The thread ID.}
 
-\item{assistant_id}{Assistant ID}
+\item{assistant_id}{Character. \strong{Required.} The assistant ID to run.}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters passed to \link{RunsClient}\verb{$create()},
+such as \code{instructions}, \code{model}, \code{tools}, \code{stream}, \code{callback}.}
 }
 \value{
-Run object
+A run object with \verb{$id} and \verb{$status}.
 }
 \description{
-Create a run (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and creates a run on a thread.
+Poll the run with \code{\link[=retrieve_run]{retrieve_run()}} until status is \code{"completed"}.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+run <- create_run(
+  thread_id    = "thread_abc123",
+  assistant_id = "asst_abc123"
+)
+cat("Run ID:", run$id, "Status:", run$status)
+
+# Poll until done
+repeat {
+  run <- retrieve_run("thread_abc123", run$id)
+  if (run$status \%in\% c("completed", "failed", "cancelled")) break
+  Sys.sleep(2)
+}
+}
 }

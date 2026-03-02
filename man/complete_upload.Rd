@@ -2,20 +2,36 @@
 % Please edit documentation in R/uploads.R
 \name{complete_upload}
 \alias{complete_upload}
-\title{Complete an upload (convenience function)}
+\title{Complete a Multipart Upload (Convenience Function)}
 \usage{
 complete_upload(upload_id, part_ids, ...)
 }
 \arguments{
-\item{upload_id}{Upload ID}
+\item{upload_id}{Character. \strong{Required.} The upload session ID.}
 
-\item{part_ids}{Part IDs}
+\item{part_ids}{List of character strings. \strong{Required.} Part IDs collected
+from \code{\link[=add_upload_part]{add_upload_part()}} calls, in the correct file order.}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters such as \code{md5} (integrity checksum).}
 }
 \value{
-File object
+A standard File object with \verb{$id} that can be used in fine-tuning,
+assistants, or batch API calls, just like a file from \code{upload_file()}.
 }
 \description{
-Complete an upload (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and finalizes a multipart upload.
+Assembles all uploaded parts into a single file.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+# After uploading all parts, complete the upload:
+file_obj <- complete_upload(
+  upload_id = upload$id,
+  part_ids  = list("part-001", "part-002", "part-003")
+)
+cat("File ID:", file_obj$id)
+}
 }

@@ -2,20 +2,46 @@
 % Please edit documentation in R/images.R
 \name{create_image}
 \alias{create_image}
-\title{Create an image (convenience function)}
+\title{Generate an Image from Text (Convenience Function)}
 \usage{
 create_image(prompt, model = "dall-e-3", ...)
 }
 \arguments{
-\item{prompt}{Text description}
+\item{prompt}{Character. \strong{Required.} Text description of the desired image.
+For DALL-E 3, up to 4000 characters.}
 
-\item{model}{Model to use}
+\item{model}{Character. Image model: \code{"dall-e-3"} (default) or \code{"dall-e-2"}.}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters passed to \link{ImagesClient}\verb{$create()}, such
+as \code{n}, \code{size} (\code{"1024x1024"}, \code{"1792x1024"}, \code{"1024x1792"}),
+\code{quality} (\code{"standard"} or \code{"hd"}),
+\code{style} (\code{"vivid"} or \code{"natural"}),
+\code{response_format} (\code{"url"} or \code{"b64_json"}).}
 }
 \value{
-Images response
+A list with \verb{$data[[1]]$url} containing the image URL, and
+\verb{$data[[1]]$revised_prompt} with the prompt used by DALL-E 3.
 }
 \description{
-Create an image (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and calls \code{client$images$create()}.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+# Generate a standard image
+resp <- create_image("A futuristic chart showing economic data, neon style")
+cat(resp$data[[1]]$url)
+
+# HD landscape
+resp <- create_image(
+  prompt  = "A detailed map of global trade routes",
+  model   = "dall-e-3",
+  size    = "1792x1024",
+  quality = "hd",
+  style   = "natural"
+)
+cat(resp$data[[1]]$url)
+}
 }

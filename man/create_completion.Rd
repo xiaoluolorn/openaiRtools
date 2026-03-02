@@ -2,20 +2,43 @@
 % Please edit documentation in R/completions.R
 \name{create_completion}
 \alias{create_completion}
-\title{Create a completion (convenience function)}
+\title{Create a Legacy Text Completion (Convenience Function)}
 \usage{
 create_completion(prompt, model = "gpt-3.5-turbo-instruct", ...)
 }
 \arguments{
-\item{prompt}{Text prompt}
+\item{prompt}{Character. \strong{Required.} The text prompt to complete.}
 
-\item{model}{Model to use}
+\item{model}{Character. Model ID. Only \code{"gpt-3.5-turbo-instruct"},
+\code{"davinci-002"}, and \code{"babbage-002"} support this endpoint.
+Default: \code{"gpt-3.5-turbo-instruct"}.}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters passed to \link{CompletionsClient}\verb{$create()},
+such as \code{max_tokens}, \code{temperature}, \code{n}, \code{stop}, \code{stream}, etc.}
 }
 \value{
-Completion response
+A named list. Access the generated text via
+\verb{$choices[[1]]$text}.
 }
 \description{
-Create a completion (convenience function)
+\strong{Note:} This is the legacy Completions API. For most tasks, use
+\code{\link[=create_chat_completion]{create_chat_completion()}} instead, which supports system prompts,
+conversation history, and more capable models.
+}
+\details{
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and calls \code{client$completions$create()}.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+# Complete a sentence
+resp <- create_completion(
+  prompt     = "The most important assumption of OLS regression is",
+  model      = "gpt-3.5-turbo-instruct",
+  max_tokens = 100
+)
+cat(resp$choices[[1]]$text)
+}
 }

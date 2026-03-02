@@ -2,22 +2,52 @@
 % Please edit documentation in R/audio.R
 \name{create_speech}
 \alias{create_speech}
-\title{Create speech (convenience function)}
+\title{Convert Text to Speech (Convenience Function)}
 \usage{
 create_speech(input, model = "tts-1", voice = "alloy", ...)
 }
 \arguments{
-\item{input}{Text to synthesize}
+\item{input}{Character. \strong{Required.} The text to synthesize (max 4096 chars).}
 
-\item{model}{Model to use}
+\item{model}{Character. TTS model: \code{"tts-1"} (fast) or \code{"tts-1-hd"}
+(higher quality). Default: \code{"tts-1"}.}
 
-\item{voice}{Voice to use}
+\item{voice}{Character. Voice style. One of: \code{"alloy"}, \code{"ash"},
+\code{"coral"}, \code{"echo"}, \code{"fable"}, \code{"onyx"}, \code{"nova"}, \code{"sage"},
+\code{"shimmer"}. Default: \code{"alloy"}.}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters passed to \link{SpeechClient}\verb{$create()},
+such as \code{response_format} (\code{"mp3"}, \code{"wav"}, \code{"flac"}, etc.)
+and \code{speed} (0.25–4.0).}
 }
 \value{
-Raw audio data
+A \code{raw} vector of binary audio data. Save using \code{writeBin()}.
 }
 \description{
-Create speech (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and calls \code{client$audio$speech$create()}.
+Returns raw binary audio data that should be saved with \code{writeBin()}.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+# Generate and save to MP3
+audio <- create_speech(
+  input = "The quick brown fox jumps over the lazy dog.",
+  model = "tts-1",
+  voice = "nova"
+)
+writeBin(audio, "output.mp3")
+
+# High-quality WAV with slower speed
+audio <- create_speech(
+  input           = "Welcome to the lecture on macroeconomics.",
+  model           = "tts-1-hd",
+  voice           = "onyx",
+  response_format = "wav",
+  speed           = 0.9
+)
+writeBin(audio, "lecture_intro.wav")
+}
 }

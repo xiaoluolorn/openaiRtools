@@ -2,16 +2,25 @@
 % Please edit documentation in R/files.R
 \name{delete_file}
 \alias{delete_file}
-\title{Delete a file (convenience function)}
+\title{Delete an Uploaded File (Convenience Function)}
 \usage{
 delete_file(file_id)
 }
 \arguments{
-\item{file_id}{File ID}
+\item{file_id}{Character. \strong{Required.} The file ID to delete.}
 }
 \value{
-Deletion status
+A list with \verb{$deleted} (\code{TRUE} if successful) and \verb{$id}.
 }
 \description{
-Delete a file (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and deletes a file.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+result <- delete_file("file-abc123")
+if (result$deleted) cat("File deleted successfully.")
+}
 }

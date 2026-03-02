@@ -2,18 +2,38 @@
 % Please edit documentation in R/threads.R
 \name{list_messages}
 \alias{list_messages}
-\title{List messages (convenience function)}
+\title{List Messages in a Thread (Convenience Function)}
 \usage{
 list_messages(thread_id, ...)
 }
 \arguments{
-\item{thread_id}{Thread ID}
+\item{thread_id}{Character. \strong{Required.} The thread ID.}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters passed to \link{MessagesClient}\verb{$list()},
+such as \code{limit}, \code{order} (\code{"asc"}/\code{"desc"}), \code{after}, \code{run_id}.}
 }
 \value{
-List of messages
+A list with \verb{$data} — a list of message objects, newest first
+(by default). Access reply text via:
+\code{msgs$data[[1]]$content[[1]]$text$value}.
 }
 \description{
-List messages (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and lists messages in a thread.
+After a run completes, the assistant's reply appears in this list.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+# Read latest messages (newest first)
+msgs <- list_messages("thread_abc123")
+cat("Assistant reply:", msgs$data[[1]]$content[[1]]$text$value)
+
+# Print full conversation chronologically
+msgs <- list_messages("thread_abc123", order = "asc")
+for (m in msgs$data) {
+  cat(toupper(m$role), ":", m$content[[1]]$text$value, "\n\n")
+}
+}
 }

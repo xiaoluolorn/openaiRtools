@@ -4,9 +4,9 @@
 \alias{VectorStoreFileBatchesClient}
 \title{Vector Store File Batches Client}
 \description{
-Vector Store File Batches Client
-
-Vector Store File Batches Client
+Add multiple files to a vector store in a single batch operation.
+More efficient than adding files one-by-one when loading many files.
+Access via \code{client$vector_stores$file_batches}.
 }
 \section{Methods}{
 \subsection{Public methods}{

@@ -2,16 +2,24 @@
 % Please edit documentation in R/threads.R
 \name{delete_thread}
 \alias{delete_thread}
-\title{Delete a thread (convenience function)}
+\title{Delete a Thread (Convenience Function)}
 \usage{
 delete_thread(thread_id)
 }
 \arguments{
-\item{thread_id}{Thread ID}
+\item{thread_id}{Character. \strong{Required.} The thread ID to delete.}
 }
 \value{
-Deletion status
+A list with \verb{$deleted} (\code{TRUE}) and \verb{$id}.
 }
 \description{
-Delete a thread (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and permanently deletes a thread.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+result <- delete_thread("thread_abc123")
+if (result$deleted) cat("Thread deleted.")
+}
 }

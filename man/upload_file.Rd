@@ -2,18 +2,34 @@
 % Please edit documentation in R/files.R
 \name{upload_file}
 \alias{upload_file}
-\title{Upload a file (convenience function)}
+\title{Upload a File (Convenience Function)}
 \usage{
 upload_file(file, purpose)
 }
 \arguments{
-\item{file}{File path or raw content}
+\item{file}{Character or raw. \strong{Required.} Local file path or raw bytes.}
 
-\item{purpose}{Purpose of the file}
+\item{purpose}{Character. \strong{Required.} Intended use of the file:
+\code{"assistants"}, \code{"vision"}, \code{"batch"}, or \code{"fine-tune"}.}
 }
 \value{
-File object
+A file object with \verb{$id} (the file ID), \verb{$status}, \verb{$filename},
+\verb{$bytes}, and other metadata.
 }
 \description{
-Upload a file (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and calls \code{client$files$create()}.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+# Upload training data for fine-tuning
+file_obj <- upload_file("my_training_data.jsonl", purpose = "fine-tune")
+cat("Uploaded file ID:", file_obj$id)
+
+# Upload a document for an Assistant
+file_obj <- upload_file("research_paper.pdf", purpose = "assistants")
+cat("File ID:", file_obj$id)
+}
 }

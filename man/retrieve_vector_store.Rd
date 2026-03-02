@@ -2,16 +2,28 @@
 % Please edit documentation in R/vector_stores.R
 \name{retrieve_vector_store}
 \alias{retrieve_vector_store}
-\title{Retrieve a vector store (convenience function)}
+\title{Retrieve a Vector Store (Convenience Function)}
 \usage{
 retrieve_vector_store(vector_store_id)
 }
 \arguments{
-\item{vector_store_id}{Vector store ID}
+\item{vector_store_id}{Character. \strong{Required.} The vector store ID
+(e.g. \code{"vs_abc123"}).}
 }
 \value{
-Vector store object
+A vector store object with \verb{$id}, \verb{$name}, \verb{$status},
+and \verb{$file_counts}.
 }
 \description{
-Retrieve a vector store (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and retrieves a vector store by its ID.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+vs <- retrieve_vector_store("vs_abc123")
+cat("Name:", vs$name)
+cat("Files:", vs$file_counts$completed, "ready")
+}
 }

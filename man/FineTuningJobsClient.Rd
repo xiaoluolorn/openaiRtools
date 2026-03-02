@@ -4,9 +4,8 @@
 \alias{FineTuningJobsClient}
 \title{Fine-tuning Jobs Client}
 \description{
-Fine-tuning Jobs Client
-
-Fine-tuning Jobs Client
+Manage fine-tuning jobs — create, list, retrieve, cancel, and monitor events.
+Access via \code{client$fine_tuning$jobs}.
 }
 \section{Methods}{
 \subsection{Public methods}{

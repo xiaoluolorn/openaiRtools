@@ -2,16 +2,25 @@
 % Please edit documentation in R/uploads.R
 \name{cancel_upload}
 \alias{cancel_upload}
-\title{Cancel an upload (convenience function)}
+\title{Cancel a Multipart Upload (Convenience Function)}
 \usage{
 cancel_upload(upload_id)
 }
 \arguments{
-\item{upload_id}{Upload ID}
+\item{upload_id}{Character. \strong{Required.} The upload session ID to cancel.}
 }
 \value{
-Cancelled upload
+An upload object with \verb{$status = "cancelled"}.
 }
 \description{
-Cancel an upload (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and cancels an in-progress multipart upload.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+result <- cancel_upload("upload_abc123")
+cat("Status:", result$status) # "cancelled"
+}
 }

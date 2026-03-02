@@ -2,16 +2,28 @@
 % Please edit documentation in R/models.R
 \name{delete_model}
 \alias{delete_model}
-\title{Delete a model (convenience function)}
+\title{Delete a Fine-Tuned Model (Convenience Function)}
 \usage{
 delete_model(model)
 }
 \arguments{
-\item{model}{Model ID}
+\item{model}{Character. \strong{Required.} The fine-tuned model ID to delete.
+Fine-tuned model IDs have the format \code{"ft:gpt-3.5-turbo:org:suffix:id"}.}
 }
 \value{
-Deletion status
+A list with \verb{$id} (the deleted model ID) and
+\verb{$deleted} (\code{TRUE} if successful).
 }
 \description{
-Delete a model (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and deletes a fine-tuned model you own.
+Only models you created via fine-tuning can be deleted.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+result <- delete_model("ft:gpt-3.5-turbo:myorg:experiment:abc123")
+if (result$deleted) cat("Model deleted successfully.\n")
+}
 }

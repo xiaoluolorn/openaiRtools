@@ -4,9 +4,9 @@
 \alias{VectorStoreFilesClient}
 \title{Vector Store Files Client}
 \description{
-Vector Store Files Client
-
-Vector Store Files Client
+Manages individual files within a vector store. Adding a file triggers
+automatic chunking and embedding.
+Access via \code{client$vector_stores$files}.
 }
 \section{Methods}{
 \subsection{Public methods}{

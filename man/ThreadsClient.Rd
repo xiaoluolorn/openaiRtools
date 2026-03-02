@@ -4,9 +4,34 @@
 \alias{ThreadsClient}
 \title{Threads Client (Beta)}
 \description{
-Client for OpenAI Threads API v2.
-Threads are conversations with assistants.
+A Thread stores the message history of a conversation with an Assistant.
+Threads are persistent: they accumulate messages over multiple runs and
+can be retrieved at any time.
 }
+\details{
+Client for the OpenAI Threads API v2 (Beta).
+Threads are persistent conversation containers for Assistants.
+Access via \code{client$threads}.
+}
+\section{Sub-clients}{
+
+\describe{
+\item{\verb{$runs}}{\link{RunsClient} — Create and manage runs on threads}
+\item{\verb{$messages}}{\link{MessagesClient} — Add and read thread messages}
+}
+}
+
+\section{Typical workflow}{
+
+\enumerate{
+\item Create a thread: \code{client$threads$create()}
+\item Add user message: \code{client$threads$messages$create(thread_id, "user", "...")}
+\item Create a run: \code{client$threads$runs$create(thread_id, assistant_id)}
+\item Poll run until \verb{$status == "completed"}
+\item Read response: \code{client$threads$messages$list(thread_id)}
+}
+}
+
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{

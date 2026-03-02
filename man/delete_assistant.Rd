@@ -2,16 +2,25 @@
 % Please edit documentation in R/assistants.R
 \name{delete_assistant}
 \alias{delete_assistant}
-\title{Delete an assistant (convenience function)}
+\title{Delete an Assistant (Convenience Function)}
 \usage{
 delete_assistant(assistant_id)
 }
 \arguments{
-\item{assistant_id}{Assistant ID}
+\item{assistant_id}{Character. \strong{Required.} The ID of the assistant to delete.}
 }
 \value{
-Deletion status
+A list with \verb{$deleted} (\code{TRUE} if successful) and \verb{$id}.
 }
 \description{
-Delete an assistant (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and permanently deletes an assistant.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+result <- delete_assistant("asst_abc123")
+if (result$deleted) cat("Assistant deleted.")
+}
 }

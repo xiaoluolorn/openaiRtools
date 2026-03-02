@@ -2,18 +2,30 @@
 % Please edit documentation in R/fine_tuning.R
 \name{list_fine_tuning_events}
 \alias{list_fine_tuning_events}
-\title{List fine-tuning events (convenience function)}
+\title{List Fine-tuning Events (Convenience Function)}
 \usage{
 list_fine_tuning_events(fine_tuning_job_id, ...)
 }
 \arguments{
-\item{fine_tuning_job_id}{Job ID}
+\item{fine_tuning_job_id}{Character. \strong{Required.} The fine-tuning job ID.}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters passed to \link{FineTuningJobsClient}\verb{$list_events()},
+such as \code{limit} (max events to return) and \code{after} (pagination cursor).}
 }
 \value{
-List of events
+A list with \verb{$data} — a list of event objects, each containing
+\verb{$message} (description), \verb{$level}, and \verb{$created_at} (Unix timestamp).
 }
 \description{
-List fine-tuning events (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and lists training events for a fine-tuning job.
+Events include per-step training loss metrics and status messages.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+events <- list_fine_tuning_events("ftjob-abc123", limit = 50)
+for (e in events$data) cat(e$message, "\n")
+}
 }

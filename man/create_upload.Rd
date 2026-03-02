@@ -2,22 +2,42 @@
 % Please edit documentation in R/uploads.R
 \name{create_upload}
 \alias{create_upload}
-\title{Create an upload (convenience function)}
+\title{Create a Multipart Upload Session (Convenience Function)}
 \usage{
 create_upload(purpose, filename, bytes, ...)
 }
 \arguments{
-\item{purpose}{Upload purpose}
+\item{purpose}{Character. \strong{Required.} The intended use:
+\code{"assistants"}, \code{"batch"}, or \code{"fine-tune"}.}
 
-\item{filename}{Filename}
+\item{filename}{Character. \strong{Required.} The original name of the file.}
 
-\item{bytes}{File size}
+\item{bytes}{Integer. \strong{Required.} Total file size in bytes
+(\code{file.info("myfile.jsonl")$size}).}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters passed to \link{UploadsClient}\verb{$create()},
+such as \code{mime_type}.}
 }
 \value{
-Upload object
+An upload object with \verb{$id} (use in \code{add_upload_part()} and
+\code{complete_upload()}).
 }
 \description{
-Create an upload (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and initializes a multipart upload session.
+Use this when your file exceeds the 512 MB single-upload limit.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+file_size <- file.info("huge_training.jsonl")$size
+upload <- create_upload(
+  purpose   = "fine-tune",
+  filename  = "huge_training.jsonl",
+  bytes     = file_size,
+  mime_type = "application/json"
+)
+cat("Upload ID:", upload$id)
+}
 }

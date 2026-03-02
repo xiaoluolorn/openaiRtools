@@ -2,16 +2,28 @@
 % Please edit documentation in R/fine_tuning.R
 \name{retrieve_fine_tuning_job}
 \alias{retrieve_fine_tuning_job}
-\title{Retrieve a fine-tuning job (convenience function)}
+\title{Retrieve a Fine-tuning Job (Convenience Function)}
 \usage{
 retrieve_fine_tuning_job(fine_tuning_job_id)
 }
 \arguments{
-\item{fine_tuning_job_id}{Job ID}
+\item{fine_tuning_job_id}{Character. \strong{Required.} The fine-tuning job ID
+(e.g. \code{"ftjob-abc123"}).}
 }
 \value{
-Job details
+A fine-tuning job object with \verb{$status}, \verb{$model}, and
+\verb{$fine_tuned_model} (the resulting model ID when status is \code{"succeeded"}).
 }
 \description{
-Retrieve a fine-tuning job (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and retrieves a specific fine-tuning job.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+job <- retrieve_fine_tuning_job("ftjob-abc123")
+cat("Status:", job$status)
+if (job$status == "succeeded") cat("Model:", job$fine_tuned_model)
+}
 }

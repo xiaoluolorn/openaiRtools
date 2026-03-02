@@ -4,8 +4,14 @@
 \alias{CompletionsClient}
 \title{Completions Client (Legacy)}
 \description{
-Client for OpenAI Completions API (legacy).
-For most use cases, use Chat Completions instead.
+\strong{Note:} This is the legacy "instruct" style API. For most use cases,
+use \link{ChatCompletionsClient} (\code{client$chat$completions}) instead.
+The Completions API is suitable only for \code{"gpt-3.5-turbo-instruct"} and
+\code{"davinci-002"}. It takes a raw text prompt and returns a completion.
+}
+\details{
+Client for the OpenAI Completions API (legacy text completion endpoint).
+Access via \code{client$completions}.
 }
 \section{Methods}{
 \subsection{Public methods}{

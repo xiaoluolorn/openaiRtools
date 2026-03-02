@@ -2,22 +2,40 @@
 % Please edit documentation in R/images.R
 \name{create_image_edit}
 \alias{create_image_edit}
-\title{Create an edited image (convenience function)}
+\title{Edit an Image with DALL-E (Convenience Function)}
 \usage{
 create_image_edit(image, prompt, mask = NULL, ...)
 }
 \arguments{
-\item{image}{Image file path}
+\item{image}{Character. \strong{Required.} Path to the local square PNG to edit
+(less than 4 MB).}
 
-\item{prompt}{Text description}
+\item{prompt}{Character. \strong{Required.} Description of the desired edit.}
 
-\item{mask}{Mask file path (optional)}
+\item{mask}{Character or NULL. Path to a mask PNG. Transparent pixels
+indicate which region to edit. Default: NULL (entire image).}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters passed to \link{ImagesClient}\verb{$edit()}, such
+as \code{n} (number of images), \code{size}, \code{response_format}, \code{user}.}
 }
 \value{
-Images response
+A list with \verb{$data} containing the edited image object(s).
+Access the URL via \verb{$data[[1]]$url}.
 }
 \description{
-Create an edited image (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and calls \code{client$images$edit()}.
+Edits a local PNG image based on a text prompt and optional mask.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+resp <- create_image_edit(
+  image  = "photo.png",
+  prompt = "Add a mountain range in the background",
+  mask   = "sky_mask.png"
+)
+cat(resp$data[[1]]$url)
+}
 }

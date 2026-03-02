@@ -4,9 +4,9 @@
 \alias{RunStepsClient}
 \title{Run Steps Client}
 \description{
-Run Steps Client
-
-Run Steps Client
+Lists and retrieves the individual steps taken during a run.
+Each run may consist of multiple steps (e.g. thinking, tool calls,
+message creation). Access via \code{client$threads$runs$steps}.
 }
 \section{Methods}{
 \subsection{Public methods}{

@@ -2,18 +2,33 @@
 % Please edit documentation in R/fine_tuning.R
 \name{list_fine_tuning_checkpoints}
 \alias{list_fine_tuning_checkpoints}
-\title{List fine-tuning checkpoints (convenience function)}
+\title{List Fine-tuning Checkpoints (Convenience Function)}
 \usage{
 list_fine_tuning_checkpoints(fine_tuning_job_id, ...)
 }
 \arguments{
-\item{fine_tuning_job_id}{Job ID}
+\item{fine_tuning_job_id}{Character. \strong{Required.} The fine-tuning job ID.}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters passed to \link{FineTuningCheckpointsClient}\verb{$list()},
+such as \code{limit} and \code{after}.}
 }
 \value{
-List of checkpoints
+A list with \verb{$data} — a list of checkpoint objects, each containing
+\verb{$fine_tuned_model_checkpoint} (usable model ID), \verb{$step_number},
+and \verb{$metrics} (list with \verb{$train_loss}, \verb{$valid_loss}, etc.).
 }
 \description{
-List fine-tuning checkpoints (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and lists checkpoints for a fine-tuning job.
+Checkpoints are saved after each epoch and can be used as models directly.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+cps <- list_fine_tuning_checkpoints("ftjob-abc123")
+for (cp in cps$data) {
+  cat("Step:", cp$step_number, "Loss:", cp$metrics$train_loss, "\n")
+}
+}
 }

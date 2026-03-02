@@ -2,16 +2,26 @@
 % Please edit documentation in R/vector_stores.R
 \name{list_vector_stores}
 \alias{list_vector_stores}
-\title{List vector stores (convenience function)}
+\title{List Vector Stores (Convenience Function)}
 \usage{
 list_vector_stores(...)
 }
 \arguments{
-\item{...}{Additional parameters}
+\item{...}{Parameters passed to \link{VectorStoresClient}\verb{$list()}:
+\code{limit}, \code{order}, \code{after}, \code{before}.}
 }
 \value{
-List of vector stores
+A list with \verb{$data} — a list of vector store objects.
 }
 \description{
-List vector stores (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and lists all vector stores.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+stores <- list_vector_stores()
+for (s in stores$data) cat(s$id, "-", s$name, "\n")
+}
 }

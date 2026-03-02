@@ -2,13 +2,30 @@
 % Please edit documentation in R/models.R
 \name{list_models}
 \alias{list_models}
-\title{List models (convenience function)}
+\title{List Available Models (Convenience Function)}
 \usage{
 list_models()
 }
 \value{
-Models list
+A list with \verb{$data} — a list of model objects, each containing
+\verb{$id} (model name string), \verb{$owned_by}, and \verb{$created} (Unix timestamp).
 }
 \description{
-List models (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and returns all models available to your API key.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+models <- list_models()
+
+# Extract all model IDs as a character vector
+model_ids <- sapply(models$data, `[[`, "id")
+cat(model_ids, sep = "\n")
+
+# Find all embedding models
+embed_models <- model_ids[grepl("embedding", model_ids)]
+cat(embed_models, sep = "\n")
+}
 }

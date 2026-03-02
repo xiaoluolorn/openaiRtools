@@ -2,18 +2,27 @@
 % Please edit documentation in R/threads.R
 \name{retrieve_run}
 \alias{retrieve_run}
-\title{Retrieve a run (convenience function)}
+\title{Retrieve a Run (Convenience Function)}
 \usage{
 retrieve_run(thread_id, run_id)
 }
 \arguments{
-\item{thread_id}{Thread ID}
+\item{thread_id}{Character. \strong{Required.} The thread ID.}
 
-\item{run_id}{Run ID}
+\item{run_id}{Character. \strong{Required.} The run ID.}
 }
 \value{
-Run object
+A run object with \verb{$status} (\code{"queued"}, \code{"in_progress"},
+\code{"completed"}, \code{"requires_action"}, \code{"failed"}, etc.).
 }
 \description{
-Retrieve a run (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and retrieves a run's current status.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+run <- retrieve_run("thread_abc123", "run_abc123")
+cat("Status:", run$status)
+}
 }

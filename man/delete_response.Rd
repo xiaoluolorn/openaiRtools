@@ -2,16 +2,25 @@
 % Please edit documentation in R/responses.R
 \name{delete_response}
 \alias{delete_response}
-\title{Delete a response (convenience function)}
+\title{Delete a Stored Response (Convenience Function)}
 \usage{
 delete_response(response_id)
 }
 \arguments{
-\item{response_id}{Response ID}
+\item{response_id}{Character. \strong{Required.} The response ID to delete.}
 }
 \value{
-Deletion status
+A list with \verb{$deleted} (\code{TRUE} if successful).
 }
 \description{
-Delete a response (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and deletes a stored response.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+result <- delete_response("resp_abc123")
+if (result$deleted) cat("Response deleted.")
+}
 }

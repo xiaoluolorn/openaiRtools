@@ -2,16 +2,27 @@
 % Please edit documentation in R/batch.R
 \name{list_batches}
 \alias{list_batches}
-\title{List batches (convenience function)}
+\title{List Batch Jobs (Convenience Function)}
 \usage{
 list_batches(...)
 }
 \arguments{
-\item{...}{Additional parameters}
+\item{...}{Additional parameters passed to \link{BatchClient}\verb{$list()},
+such as \code{limit} and \code{after} (pagination cursor).}
 }
 \value{
-List of batches
+A list with \verb{$data} — a list of batch objects, each containing
+\verb{$id}, \verb{$status}, \verb{$request_counts}, and \verb{$output_file_id}.
 }
 \description{
-List batches (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and lists batch jobs.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+batches <- list_batches(limit = 5)
+for (b in batches$data) cat(b$id, b$status, "\n")
+}
 }

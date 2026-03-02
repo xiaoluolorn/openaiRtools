@@ -2,16 +2,29 @@
 % Please edit documentation in R/models.R
 \name{retrieve_model}
 \alias{retrieve_model}
-\title{Retrieve a model (convenience function)}
+\title{Retrieve a Model (Convenience Function)}
 \usage{
 retrieve_model(model)
 }
 \arguments{
-\item{model}{Model ID}
+\item{model}{Character. \strong{Required.} The model ID to look up.
+Examples: \code{"gpt-4o"}, \code{"gpt-3.5-turbo"}, \code{"whisper-1"},
+\code{"text-embedding-3-small"}, \code{"dall-e-3"}.}
 }
 \value{
-Model details
+A named list with model metadata: \verb{$id}, \verb{$object},
+\verb{$created} (Unix timestamp), \verb{$owned_by}.
 }
 \description{
-Retrieve a model (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and retrieves details for a specific model.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+info <- retrieve_model("gpt-4o")
+cat("ID:", info$id, "\n")
+cat("Owner:", info$owned_by, "\n")
+}
 }

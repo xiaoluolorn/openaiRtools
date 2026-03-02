@@ -4,8 +4,19 @@
 \alias{ModelsClient}
 \title{Models Client}
 \description{
-Client for OpenAI Models API.
+Client for the OpenAI Models API. Allows listing available models,
+retrieving model details, and deleting fine-tuned models.
+Access via \code{client$models}.
 }
+\section{Methods}{
+
+\describe{
+\item{\verb{$list()}}{List all available models}
+\item{\verb{$retrieve(model)}}{Get details of a specific model}
+\item{\verb{$delete(model)}}{Delete a fine-tuned model you own}
+}
+}
+
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{

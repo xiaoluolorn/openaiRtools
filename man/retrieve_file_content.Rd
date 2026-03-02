@@ -2,16 +2,31 @@
 % Please edit documentation in R/files.R
 \name{retrieve_file_content}
 \alias{retrieve_file_content}
-\title{Retrieve file content (convenience function)}
+\title{Retrieve File Content (Convenience Function)}
 \usage{
 retrieve_file_content(file_id)
 }
 \arguments{
-\item{file_id}{File ID}
+\item{file_id}{Character. \strong{Required.} The file ID to download.}
 }
 \value{
-Raw file content
+A \code{raw} vector of binary content.
+Use \code{rawToChar()} for text, or \code{writeBin()} to save to disk.
 }
 \description{
-Retrieve file content (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and downloads the raw content of a file.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+# Download batch output file
+raw_data <- retrieve_file_content("file-abc123")
+text <- rawToChar(raw_data)
+cat(text)
+
+# Save to file
+writeBin(raw_data, "batch_results.jsonl")
+}
 }

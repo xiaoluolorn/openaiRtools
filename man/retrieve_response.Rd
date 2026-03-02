@@ -2,16 +2,27 @@
 % Please edit documentation in R/responses.R
 \name{retrieve_response}
 \alias{retrieve_response}
-\title{Retrieve a response (convenience function)}
+\title{Retrieve a Response (Convenience Function)}
 \usage{
 retrieve_response(response_id)
 }
 \arguments{
-\item{response_id}{Response ID}
+\item{response_id}{Character. \strong{Required.} The response ID
+(e.g. \code{"resp_abc123"}).}
 }
 \value{
-Response object
+A response object with \verb{$output}, \verb{$model}, and \verb{$usage}.
 }
 \description{
-Retrieve a response (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and retrieves a stored response by its ID.
+Only responses created with \code{store = TRUE} can be retrieved.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+resp <- retrieve_response("resp_abc123")
+cat(resp$output[[1]]$content[[1]]$text)
+}
 }

@@ -4,9 +4,38 @@
 \alias{BatchClient}
 \title{Batch Client}
 \description{
-Client for OpenAI Batch API.
-Process large numbers of requests asynchronously.
+The Batch API accepts a JSONL file of requests, processes them within
+a 24-hour window, and returns the results in an output file.
+Suitable for: bulk embeddings, offline evaluation, large-scale text
+processing, or any task that does not require immediate results.
 }
+\details{
+Client for the OpenAI Batch API. Process large volumes of API requests
+asynchronously at 50\% lower cost than synchronous calls.
+Access via \code{client$batch}.
+}
+\section{Workflow}{
+
+\enumerate{
+\item Create a JSONL file where each line is one API request (see format below)
+\item Upload the file: \code{client$files$create(file, purpose = "batch")}
+\item Create a batch: \code{client$batch$create(input_file_id, endpoint)}
+\item Poll status: \code{client$batch$retrieve(batch_id)}
+\item Download results: \code{client$files$content(batch$output_file_id)}
+}
+}
+
+\section{JSONL request format}{
+
+Each line in the input file must be:
+\preformatted{
+{"custom_id": "req-1", "method": "POST",
+ "url": "/v1/chat/completions",
+ "body": {"model": "gpt-4o-mini",
+          "messages": [{"role": "user", "content": "Hello!"}]}}
+}
+}
+
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{

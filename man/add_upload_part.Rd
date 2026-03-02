@@ -2,18 +2,32 @@
 % Please edit documentation in R/uploads.R
 \name{add_upload_part}
 \alias{add_upload_part}
-\title{Add upload part (convenience function)}
+\title{Upload a File Part (Convenience Function)}
 \usage{
 add_upload_part(upload_id, data)
 }
 \arguments{
-\item{upload_id}{Upload ID}
+\item{upload_id}{Character. \strong{Required.} The upload session ID returned
+by \code{\link[=create_upload]{create_upload()}}.}
 
-\item{data}{Raw data}
+\item{data}{Raw. \strong{Required.} The binary chunk to upload.
+Read from file with \code{readBin(con, "raw", n = chunk_size)}.}
 }
 \value{
-Upload part
+An upload part object with \verb{$id} — save all part IDs to use
+in \code{\link[=complete_upload]{complete_upload()}}.
 }
 \description{
-Add upload part (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and uploads one part of a multipart upload.
+Call this repeatedly for each chunk of your file.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+chunk <- readBin("large_file.jsonl", "raw", n = 64 * 1024 * 1024)
+part <- add_upload_part(upload_id = upload$id, data = chunk)
+cat("Part ID:", part$id)
+}
 }

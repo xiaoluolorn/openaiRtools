@@ -4,9 +4,22 @@
 \alias{FilesClient}
 \title{Files Client}
 \description{
-Client for OpenAI Files API.
-Files are used for fine-tuning, assistants, and batch processing.
+Client for the OpenAI Files API. Upload, list, retrieve, and delete files
+that can be used with fine-tuning, assistants, batch processing, and more.
+Access via \code{client$files}.
 }
+\section{Methods}{
+
+\describe{
+\item{\verb{$create(file, purpose)}}{Upload a file}
+\item{\verb{$list(...)}}{List uploaded files, optionally filter by purpose}
+\item{\verb{$retrieve(file_id)}}{Get metadata for a specific file}
+\item{\verb{$delete(file_id)}}{Delete a file}
+\item{\verb{$content(file_id)}}{Download the raw content of a file}
+\item{\verb{$wait_for_processing(file_id, ...)}}{Poll until a file is processed}
+}
+}
+
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{

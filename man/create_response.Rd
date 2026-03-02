@@ -2,20 +2,53 @@
 % Please edit documentation in R/responses.R
 \name{create_response}
 \alias{create_response}
-\title{Create a response (convenience function)}
+\title{Create a Response (Convenience Function)}
 \usage{
 create_response(model, input, ...)
 }
 \arguments{
-\item{model}{Model ID}
+\item{model}{Character. \strong{Required.} Model ID (e.g. \code{"gpt-4o"},
+\code{"gpt-4o-mini"}, \code{"o1"}).}
 
-\item{input}{Input}
+\item{input}{\strong{Required.} A text string or list of message objects
+as the prompt.}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters passed to \link{ResponsesClient}\verb{$create()},
+such as \code{instructions}, \code{previous_response_id} (for multi-turn),
+\code{tools}, \code{temperature}, \code{max_output_tokens}, \code{stream}, \code{store}.}
 }
 \value{
-Response object
+A response object. Access the text via
+\verb{$output[[1]]$content[[1]]$text}.
 }
 \description{
-Create a response (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and calls \code{client$responses$create()}.
+}
+\details{
+The Responses API is OpenAI's newer, simpler alternative to Chat
+Completions. It natively supports multi-turn conversations using
+\code{previous_response_id} (no need to resend message history), and
+includes built-in web search, file search, and other tools.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+# Simple text response
+resp <- create_response(
+  model = "gpt-4o",
+  input = "What is the difference between OLS and IV?"
+)
+cat(resp$output[[1]]$content[[1]]$text)
+
+# Multi-turn: continue conversation using previous response ID
+resp1 <- create_response("gpt-4o", "What is GMM?")
+resp2 <- create_response(
+  model                = "gpt-4o",
+  input                = "Give me an R code example.",
+  previous_response_id = resp1$id
+)
+cat(resp2$output[[1]]$content[[1]]$text)
+}
 }

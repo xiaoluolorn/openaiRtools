@@ -4,9 +4,33 @@
 \alias{VectorStoresClient}
 \title{Vector Stores Client (Beta)}
 \description{
-Client for OpenAI Vector Stores API v2.
-Vector stores are used for file search with assistants.
+A vector store automatically chunks, embeds, and indexes files so that
+an Assistant with the \code{file_search} tool can search over them using
+natural language queries.
 }
+\details{
+Client for the OpenAI Vector Stores API v2 (Beta).
+Vector stores enable semantic file search for Assistants.
+Access via \code{client$vector_stores}.
+}
+\section{Sub-clients}{
+
+\describe{
+\item{\verb{$files}}{\link{VectorStoreFilesClient} — Add/remove files from a store}
+\item{\verb{$file_batches}}{\link{VectorStoreFileBatchesClient} — Batch-add files}
+}
+}
+
+\section{Typical workflow}{
+
+\enumerate{
+\item Upload files: \code{client$files$create(file, purpose = "assistants")}
+\item Create vector store: \code{client$vector_stores$create(name = "...")}
+\item Add files: \code{client$vector_stores$files$create(store_id, file_id)}
+\item Attach to assistant via \code{tool_resources} in \code{client$assistants$create()}
+}
+}
+
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{

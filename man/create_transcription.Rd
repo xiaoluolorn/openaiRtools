@@ -2,20 +2,43 @@
 % Please edit documentation in R/audio.R
 \name{create_transcription}
 \alias{create_transcription}
-\title{Create transcription (convenience function)}
+\title{Transcribe Audio to Text (Convenience Function)}
 \usage{
 create_transcription(file, model = "whisper-1", ...)
 }
 \arguments{
-\item{file}{Audio file path}
+\item{file}{Character. \strong{Required.} Path to the local audio file.
+Supported: flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, webm (max 25 MB).}
 
-\item{model}{Model to use}
+\item{model}{Character. Whisper model. Default: \code{"whisper-1"}.}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters passed to
+\link{AudioTranscriptionsClient}\verb{$create()}, such as \code{language}, \code{prompt},
+\code{response_format}, \code{temperature}, \code{timestamp_granularities}.}
 }
 \value{
-Transcription response
+A list with \verb{$text} containing the transcribed text (for default
+JSON format), or a character string for \code{response_format = "text"}.
 }
 \description{
-Create transcription (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and calls \code{client$audio$transcriptions$create()}.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+# Basic transcription
+result <- create_transcription("meeting.mp3")
+cat(result$text)
+
+# With language hint and plain text output
+text <- create_transcription(
+  file            = "lecture.m4a",
+  model           = "whisper-1",
+  language        = "en",
+  response_format = "text"
+)
+cat(text)
+}
 }

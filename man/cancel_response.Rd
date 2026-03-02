@@ -2,16 +2,23 @@
 % Please edit documentation in R/responses.R
 \name{cancel_response}
 \alias{cancel_response}
-\title{Cancel a response (convenience function)}
+\title{Cancel a Streaming Response (Convenience Function)}
 \usage{
 cancel_response(response_id)
 }
 \arguments{
-\item{response_id}{Response ID}
+\item{response_id}{Character. \strong{Required.} The response ID to cancel.}
 }
 \value{
-Cancelled response
+The cancelled response object.
 }
 \description{
-Cancel a response (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and cancels an in-progress response.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+cancel_response("resp_abc123")
+}
 }

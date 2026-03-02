@@ -2,18 +2,36 @@
 % Please edit documentation in R/assistants.R
 \name{create_assistant}
 \alias{create_assistant}
-\title{Create an assistant (convenience function)}
+\title{Create an Assistant (Convenience Function)}
 \usage{
 create_assistant(model, ...)
 }
 \arguments{
-\item{model}{Model ID}
+\item{model}{Character. \strong{Required.} Model ID to power the assistant
+(e.g. \code{"gpt-4o"}, \code{"gpt-4o-mini"}).}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters passed to \link{AssistantsClient}\verb{$create()}:
+\code{name}, \code{description}, \code{instructions}, \code{tools}, \code{tool_resources},
+\code{metadata}, \code{temperature}, \code{top_p}, \code{response_format}.}
 }
 \value{
-Assistant object
+An assistant object with \verb{$id} (save this for future use),
+\verb{$name}, \verb{$model}, \verb{$instructions}, and \verb{$tools}.
 }
 \description{
-Create an assistant (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and calls \code{client$assistants$create()}.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+asst <- create_assistant(
+  model        = "gpt-4o",
+  name         = "Stats Helper",
+  instructions = "You help with statistical analysis in R and Python.",
+  tools        = list(list(type = "code_interpreter"))
+)
+cat("Created assistant ID:", asst$id)
+}
 }

@@ -4,8 +4,19 @@
 \alias{AudioClient}
 \title{Audio Client}
 \description{
-Client for OpenAI Audio API (transcription, translation, speech).
+Top-level client for the OpenAI Audio API, providing access to
+transcription, translation, and text-to-speech services.
+Access via \code{client$audio}.
 }
+\section{Sub-clients}{
+
+\describe{
+\item{\verb{$transcriptions}}{\link{AudioTranscriptionsClient} — Whisper speech-to-text}
+\item{\verb{$translations}}{\link{AudioTranslationsClient} — Whisper audio translation to English}
+\item{\verb{$speech}}{\link{SpeechClient} — Text-to-speech (TTS)}
+}
+}
+
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{

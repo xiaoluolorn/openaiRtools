@@ -2,20 +2,35 @@
 % Please edit documentation in R/batch.R
 \name{create_batch}
 \alias{create_batch}
-\title{Create a batch (convenience function)}
+\title{Create a Batch Job (Convenience Function)}
 \usage{
 create_batch(input_file_id, endpoint, ...)
 }
 \arguments{
-\item{input_file_id}{File ID}
+\item{input_file_id}{Character. \strong{Required.} File ID of the uploaded
+JSONL batch input file (uploaded with \code{purpose = "batch"}).}
 
-\item{endpoint}{Endpoint}
+\item{endpoint}{Character. \strong{Required.} API endpoint for each request.
+One of \code{"/v1/chat/completions"}, \code{"/v1/embeddings"}, \code{"/v1/completions"}.}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters passed to \link{BatchClient}\verb{$create()},
+such as \code{completion_window} (default \code{"24h"}) and \code{metadata}.}
 }
 \value{
-Batch object
+A batch object with \verb{$id} and \verb{$status}.
 }
 \description{
-Create a batch (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and calls \code{client$batch$create()}.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+batch <- create_batch(
+  input_file_id = "file-abc123",
+  endpoint      = "/v1/chat/completions"
+)
+cat("Batch ID:", batch$id)
+}
 }

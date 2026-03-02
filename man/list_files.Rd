@@ -2,18 +2,36 @@
 % Please edit documentation in R/files.R
 \name{list_files}
 \alias{list_files}
-\title{List files (convenience function)}
+\title{List Uploaded Files (Convenience Function)}
 \usage{
 list_files(purpose = NULL, ...)
 }
 \arguments{
-\item{purpose}{Filter by purpose}
+\item{purpose}{Character or NULL. Filter by purpose:
+\code{"assistants"}, \code{"vision"}, \code{"batch"}, or \code{"fine-tune"}.
+If NULL, all files are returned. Default: NULL.}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters passed to \link{FilesClient}\verb{$list()},
+such as \code{limit}, \code{after}, \code{order}.}
 }
 \value{
-List of files
+A list with \verb{$data} — a list of file objects, each containing
+\verb{$id}, \verb{$filename}, \verb{$bytes}, \verb{$purpose}, \verb{$status}, and \verb{$created_at}.
 }
 \description{
-List files (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and calls \code{client$files$list()}.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+# List all files
+all_files <- list_files()
+cat("Total files:", length(all_files$data))
+
+# List only fine-tuning files
+ft_files <- list_files(purpose = "fine-tune")
+for (f in ft_files$data) cat(f$id, f$filename, "\n")
+}
 }

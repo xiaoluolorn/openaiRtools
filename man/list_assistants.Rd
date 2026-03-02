@@ -2,16 +2,29 @@
 % Please edit documentation in R/assistants.R
 \name{list_assistants}
 \alias{list_assistants}
-\title{List assistants (convenience function)}
+\title{List Assistants (Convenience Function)}
 \usage{
 list_assistants(...)
 }
 \arguments{
-\item{...}{Additional parameters}
+\item{...}{Additional parameters passed to \link{AssistantsClient}\verb{$list()}:
+\code{limit} (max results), \code{order} (\code{"asc"}/\code{"desc"}), \code{after}, \code{before}.}
 }
 \value{
-List of assistants
+A list with \verb{$data} — a list of assistant objects, each with
+\verb{$id}, \verb{$name}, \verb{$model}, \verb{$instructions}, and \verb{$tools}.
 }
 \description{
-List assistants (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and lists all assistants.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+assistants <- list_assistants()
+for (a in assistants$data) {
+  cat(a$id, "-", a$name \%||\% "(unnamed)", "\n")
+}
+}
 }

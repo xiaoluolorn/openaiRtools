@@ -2,16 +2,31 @@
 % Please edit documentation in R/threads.R
 \name{create_thread}
 \alias{create_thread}
-\title{Create a thread (convenience function)}
+\title{Create a Thread (Convenience Function)}
 \usage{
 create_thread(...)
 }
 \arguments{
-\item{...}{Additional parameters}
+\item{...}{Parameters passed to \link{ThreadsClient}\verb{$create()}:
+\code{messages} (list of initial messages), \code{tool_resources}, \code{metadata}.}
 }
 \value{
-Thread object
+A thread object with \verb{$id} (save this for subsequent calls).
 }
 \description{
-Create a thread (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and creates a new thread.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+thread <- create_thread()
+cat("Thread ID:", thread$id)
+
+# With an initial message
+thread <- create_thread(
+  messages = list(list(role = "user", content = "Hello!"))
+)
+}
 }

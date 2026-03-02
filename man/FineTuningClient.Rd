@@ -4,8 +4,27 @@
 \alias{FineTuningClient}
 \title{Fine-tuning Client}
 \description{
-Client for OpenAI Fine-tuning API.
+Top-level client for the OpenAI Fine-tuning API. Fine-tuning lets you
+train a custom version of a GPT model on your own examples.
+Access via \code{client$fine_tuning}.
 }
+\section{Sub-clients}{
+
+\describe{
+\item{\verb{$jobs}}{\link{FineTuningJobsClient} — Create and manage fine-tuning jobs}
+}
+}
+
+\section{Workflow}{
+
+\enumerate{
+\item Upload training data (JSONL file) via \code{client$files$create(purpose = "fine-tune")}
+\item Create a fine-tuning job with \code{client$fine_tuning$jobs$create()}
+\item Monitor progress with \code{client$fine_tuning$jobs$retrieve()} or \verb{$list_events()}
+\item Use the resulting model ID in chat completions once status is \code{"succeeded"}
+}
+}
+
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{

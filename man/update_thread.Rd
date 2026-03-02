@@ -2,18 +2,25 @@
 % Please edit documentation in R/threads.R
 \name{update_thread}
 \alias{update_thread}
-\title{Update a thread (convenience function)}
+\title{Update a Thread (Convenience Function)}
 \usage{
 update_thread(thread_id, ...)
 }
 \arguments{
-\item{thread_id}{Thread ID}
+\item{thread_id}{Character. \strong{Required.} The thread ID.}
 
-\item{...}{Fields to update}
+\item{...}{Named fields to update, e.g. \code{metadata = list(label = "session-2")}.}
 }
 \value{
-Updated thread
+The updated thread object.
 }
 \description{
-Update a thread (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and updates a thread's metadata.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+update_thread("thread_abc123", metadata = list(topic = "GMM lecture"))
+}
 }

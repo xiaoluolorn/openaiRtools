@@ -4,9 +4,28 @@
 \alias{AssistantsClient}
 \title{Assistants Client (Beta)}
 \description{
-Client for OpenAI Assistants API v2.
-Build AI assistants with tools and persistent state.
+An Assistant is a configured AI entity with a model, instructions, and
+optional tools. It operates on \link{ThreadsClient} (conversations) by
+creating Runs that execute the assistant's logic.
 }
+\details{
+Client for the OpenAI Assistants API v2 (Beta).
+Assistants are AI agents that can use tools (code interpreter,
+file search, custom functions) and maintain persistent state.
+Access via \code{client$assistants}.
+}
+\section{Typical workflow}{
+
+\enumerate{
+\item Create an assistant: \code{client$assistants$create(model, instructions, tools)}
+\item Create a thread: \code{client$threads$create()}
+\item Add a user message: \code{client$threads$messages$create(thread_id, "user", "...")}
+\item Create a run: \code{client$threads$runs$create(thread_id, assistant_id)}
+\item Poll the run until status is \code{"completed"}
+\item Read the assistant's reply: \code{client$threads$messages$list(thread_id)}
+}
+}
+
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{

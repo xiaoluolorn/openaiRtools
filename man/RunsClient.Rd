@@ -4,10 +4,17 @@
 \alias{RunsClient}
 \title{Runs Client}
 \description{
-Runs Client
-
-Runs Client
+Manages runs on threads. A run executes an assistant's logic against
+a thread's messages and produces a response.
+Access via \code{client$threads$runs}.
 }
+\section{Run status lifecycle}{
+
+\code{"queued"} → \code{"in_progress"} → \code{"completed"} (success)
+or → \code{"requires_action"} (tool call needed) → \code{"in_progress"} (after submitting outputs)
+or → \code{"failed"} / \code{"cancelled"} / \code{"expired"}
+}
+
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{

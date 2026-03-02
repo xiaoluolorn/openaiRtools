@@ -2,16 +2,27 @@
 % Please edit documentation in R/fine_tuning.R
 \name{list_fine_tuning_jobs}
 \alias{list_fine_tuning_jobs}
-\title{List fine-tuning jobs (convenience function)}
+\title{List Fine-tuning Jobs (Convenience Function)}
 \usage{
 list_fine_tuning_jobs(...)
 }
 \arguments{
-\item{...}{Additional parameters}
+\item{...}{Additional parameters passed to \link{FineTuningJobsClient}\verb{$list()},
+such as \code{limit} (max jobs to return) and \code{after} (pagination cursor).}
 }
 \value{
-List of fine-tuning jobs
+A list with \verb{$data} — a list of fine-tuning job objects, each
+containing \verb{$id}, \verb{$status}, \verb{$model}, \verb{$fine_tuned_model}.
 }
 \description{
-List fine-tuning jobs (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and lists fine-tuning jobs.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+jobs <- list_fine_tuning_jobs(limit = 5)
+for (j in jobs$data) cat(j$id, "-", j$status, "\n")
+}
 }

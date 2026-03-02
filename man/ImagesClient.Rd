@@ -4,8 +4,18 @@
 \alias{ImagesClient}
 \title{Images Client}
 \description{
-Client for OpenAI Images API (DALL-E).
+Client for OpenAI Images API (DALL-E image generation and editing).
+Access via \code{client$images}.
 }
+\section{Methods}{
+
+\describe{
+\item{\verb{$create(prompt, ...)}}{Generate a new image from a text description}
+\item{\verb{$edit(image, prompt, ...)}}{Edit an existing image using a mask}
+\item{\verb{$create_variation(image, ...)}}{Create variations of an existing image}
+}
+}
+
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{

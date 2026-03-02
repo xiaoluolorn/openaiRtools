@@ -2,20 +2,40 @@
 % Please edit documentation in R/images.R
 \name{create_image_variation}
 \alias{create_image_variation}
-\title{Create an image variation (convenience function)}
+\title{Create Image Variations with DALL-E (Convenience Function)}
 \usage{
 create_image_variation(image, model = "dall-e-2", ...)
 }
 \arguments{
-\item{image}{Image file path}
+\item{image}{Character. \strong{Required.} Path to the local square PNG image
+(less than 4 MB).}
 
-\item{model}{Model to use}
+\item{model}{Character. Currently only \code{"dall-e-2"} is supported.
+Default: \code{"dall-e-2"}.}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters passed to \link{ImagesClient}\verb{$create_variation()},
+such as \code{n} (number of variations, 1–10), \code{size}, \code{response_format}.}
 }
 \value{
-Images response
+A list with \verb{$data} containing the generated variation image(s).
+Access the URL via \verb{$data[[1]]$url}.
 }
 \description{
-Create an image variation (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and calls \code{client$images$create_variation()}.
+Generates one or more variations of an existing image.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+# Generate 2 variations of your logo
+resp <- create_image_variation(
+  image = "logo.png",
+  n     = 2,
+  size  = "512x512"
+)
+cat(resp$data[[1]]$url)
+cat(resp$data[[2]]$url)
+}
 }

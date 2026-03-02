@@ -2,16 +2,28 @@
 % Please edit documentation in R/assistants.R
 \name{retrieve_assistant}
 \alias{retrieve_assistant}
-\title{Retrieve an assistant (convenience function)}
+\title{Retrieve an Assistant (Convenience Function)}
 \usage{
 retrieve_assistant(assistant_id)
 }
 \arguments{
-\item{assistant_id}{Assistant ID}
+\item{assistant_id}{Character. \strong{Required.} The assistant ID
+(e.g. \code{"asst_abc123"}).}
 }
 \value{
-Assistant object
+An assistant object with \verb{$id}, \verb{$name}, \verb{$model},
+\verb{$instructions}, \verb{$tools}, and \verb{$created_at}.
 }
 \description{
-Retrieve an assistant (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and retrieves a specific assistant.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+asst <- retrieve_assistant("asst_abc123")
+cat("Name:", asst$name)
+cat("Model:", asst$model)
+}
 }

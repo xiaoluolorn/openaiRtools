@@ -4,9 +4,25 @@
 \alias{UploadsClient}
 \title{Uploads Client}
 \description{
-Client for OpenAI Uploads API.
-Upload large files in parts.
+The Uploads API is designed for files larger than what the Files API
+can handle in a single request. You split the file into parts,
+upload each part, then finalize the upload to get a standard file object.
 }
+\details{
+Client for the OpenAI Uploads API. Upload large files in multiple parts
+(multipart upload) when the file exceeds the 512 MB Files API limit.
+Access via \code{client$uploads}.
+}
+\section{Workflow}{
+
+\enumerate{
+\item \verb{$create()} — Initialize the upload session, get an \code{upload_id}
+\item \verb{$add_part()} — Upload each chunk of the file (called multiple times)
+\item \verb{$complete()} — Finalize and assemble the file; returns a File object
+\item (Optional) \verb{$cancel()} — Abort if needed
+}
+}
+
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{

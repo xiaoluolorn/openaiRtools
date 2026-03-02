@@ -2,16 +2,30 @@
 % Please edit documentation in R/vector_stores.R
 \name{create_vector_store}
 \alias{create_vector_store}
-\title{Create a vector store (convenience function)}
+\title{Create a Vector Store (Convenience Function)}
 \usage{
 create_vector_store(...)
 }
 \arguments{
-\item{...}{Additional parameters}
+\item{...}{Parameters passed to \link{VectorStoresClient}\verb{$create()}:
+\code{name}, \code{file_ids}, \code{expires_after}, \code{chunking_strategy}, \code{metadata}.}
 }
 \value{
-Vector store object
+A vector store object with \verb{$id} (save this), \verb{$name},
+\verb{$status}, and \verb{$file_counts}.
 }
 \description{
-Create a vector store (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and creates a new vector store.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+vs <- create_vector_store(
+  name     = "Economics Literature",
+  file_ids = list("file-abc123", "file-def456")
+)
+cat("Vector Store ID:", vs$id)
+}
 }

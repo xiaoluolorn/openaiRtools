@@ -2,22 +2,37 @@
 % Please edit documentation in R/threads.R
 \name{create_message}
 \alias{create_message}
-\title{Create a message (convenience function)}
+\title{Add a Message to a Thread (Convenience Function)}
 \usage{
 create_message(thread_id, role, content, ...)
 }
 \arguments{
-\item{thread_id}{Thread ID}
+\item{thread_id}{Character. \strong{Required.} The thread ID.}
 
-\item{role}{Message role}
+\item{role}{Character. \strong{Required.} \code{"user"} or \code{"assistant"}.}
 
-\item{content}{Message content}
+\item{content}{Character or list. \strong{Required.} The message text, or a
+list of content parts for multimodal messages.}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters passed to \link{MessagesClient}\verb{$create()},
+such as \code{attachments} and \code{metadata}.}
 }
 \value{
-Message object
+A message object with \verb{$id} and \verb{$content}.
 }
 \description{
-Create a message (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and adds a message to a thread.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+msg <- create_message(
+  thread_id = "thread_abc123",
+  role      = "user",
+  content   = "What is the difference between FE and RE estimators?"
+)
+cat("Message ID:", msg$id)
+}
 }

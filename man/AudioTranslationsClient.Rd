@@ -4,9 +4,8 @@
 \alias{AudioTranslationsClient}
 \title{Audio Translations Client}
 \description{
-Audio Translations Client
-
-Audio Translations Client
+Translates audio from any supported language into English text using
+Whisper. Access via \code{client$audio$translations}.
 }
 \section{Methods}{
 \subsection{Public methods}{

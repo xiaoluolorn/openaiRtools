@@ -2,18 +2,25 @@
 % Please edit documentation in R/threads.R
 \name{cancel_run}
 \alias{cancel_run}
-\title{Cancel a run (convenience function)}
+\title{Cancel a Run (Convenience Function)}
 \usage{
 cancel_run(thread_id, run_id)
 }
 \arguments{
-\item{thread_id}{Thread ID}
+\item{thread_id}{Character. \strong{Required.} The thread ID.}
 
-\item{run_id}{Run ID}
+\item{run_id}{Character. \strong{Required.} The run ID to cancel.}
 }
 \value{
-Cancelled run
+A run object with \verb{$status = "cancelling"}.
 }
 \description{
-Cancel a run (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and cancels a running or queued run.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+cancel_run("thread_abc123", "run_abc123")
+}
 }

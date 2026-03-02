@@ -2,16 +2,32 @@
 % Please edit documentation in R/batch.R
 \name{retrieve_batch}
 \alias{retrieve_batch}
-\title{Retrieve a batch (convenience function)}
+\title{Retrieve a Batch Job (Convenience Function)}
 \usage{
 retrieve_batch(batch_id)
 }
 \arguments{
-\item{batch_id}{Batch ID}
+\item{batch_id}{Character. \strong{Required.} The batch ID (e.g. \code{"batch_abc123"}).}
 }
 \value{
-Batch object
+A batch object with \verb{$status}, \verb{$request_counts}
+(\verb{$total}, \verb{$completed}, \verb{$failed}), and \verb{$output_file_id} (when done).
 }
 \description{
-Retrieve a batch (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and retrieves a specific batch.
+Use this to poll status and get the \code{output_file_id} when the batch
+is complete.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+batch <- retrieve_batch("batch_abc123")
+cat("Status:", batch$status)
+if (batch$status == "completed") {
+  raw <- retrieve_file_content(batch$output_file_id)
+  cat(rawToChar(raw))
+}
+}
 }

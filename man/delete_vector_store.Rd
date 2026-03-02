@@ -2,16 +2,26 @@
 % Please edit documentation in R/vector_stores.R
 \name{delete_vector_store}
 \alias{delete_vector_store}
-\title{Delete a vector store (convenience function)}
+\title{Delete a Vector Store (Convenience Function)}
 \usage{
 delete_vector_store(vector_store_id)
 }
 \arguments{
-\item{vector_store_id}{Vector store ID}
+\item{vector_store_id}{Character. \strong{Required.} The vector store ID.}
 }
 \value{
-Deletion status
+A list with \verb{$deleted} (\code{TRUE}) and \verb{$id}.
 }
 \description{
-Delete a vector store (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and deletes a vector store.
+This removes the search index but does NOT delete the underlying files.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+result <- delete_vector_store("vs_abc123")
+if (result$deleted) cat("Vector store deleted.")
+}
 }

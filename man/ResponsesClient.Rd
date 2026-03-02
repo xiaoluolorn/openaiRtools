@@ -4,8 +4,15 @@
 \alias{ResponsesClient}
 \title{Responses Client}
 \description{
-Client for OpenAI Responses API.
-New unified API for generating text and handling complex workflows.
+The Responses API is OpenAI's next-generation API that simplifies
+multi-turn conversations (via \code{previous_response_id}), supports web search,
+file search, and computer use as built-in tools, and provides a cleaner
+interface than Chat Completions for complex agentic applications.
+}
+\details{
+Client for the OpenAI Responses API — a new, unified API for generating
+text responses, managing multi-turn conversations, and using built-in tools.
+Access via \code{client$responses}.
 }
 \section{Methods}{
 \subsection{Public methods}{

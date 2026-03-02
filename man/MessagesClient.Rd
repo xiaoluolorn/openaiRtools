@@ -4,9 +4,9 @@
 \alias{MessagesClient}
 \title{Messages Client}
 \description{
-Messages Client
-
-Messages Client
+Manages messages within threads. Messages store the conversation history
+between the user and the assistant.
+Access via \code{client$threads$messages}.
 }
 \section{Methods}{
 \subsection{Public methods}{

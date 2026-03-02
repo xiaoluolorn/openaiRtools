@@ -2,20 +2,39 @@
 % Please edit documentation in R/fine_tuning.R
 \name{create_fine_tuning_job}
 \alias{create_fine_tuning_job}
-\title{Create a fine-tuning job (convenience function)}
+\title{Create a Fine-tuning Job (Convenience Function)}
 \usage{
 create_fine_tuning_job(training_file, model = "gpt-3.5-turbo", ...)
 }
 \arguments{
-\item{training_file}{Training file ID}
+\item{training_file}{Character. \strong{Required.} File ID of the uploaded
+training JSONL file (e.g. from \code{upload_file(..., purpose = "fine-tune")}).}
 
-\item{model}{Model to fine-tune}
+\item{model}{Character. Base model to fine-tune:
+\code{"gpt-3.5-turbo"}, \code{"gpt-4o-mini"}, \code{"gpt-4o"}, etc.
+Default: \code{"gpt-3.5-turbo"}.}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters passed to \link{FineTuningJobsClient}\verb{$create()},
+such as \code{suffix}, \code{hyperparameters} (list with \code{n_epochs}, \code{batch_size}),
+\code{validation_file}, \code{seed}.}
 }
 \value{
-Fine-tuning job
+A fine-tuning job object with \verb{$id} and \verb{$status}.
 }
 \description{
-Create a fine-tuning job (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and calls \code{client$fine_tuning$jobs$create()}.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+job <- create_fine_tuning_job(
+  training_file   = "file-abc123",
+  model           = "gpt-3.5-turbo",
+  suffix          = "my-assistant",
+  hyperparameters = list(n_epochs = 3)
+)
+cat("Job ID:", job$id)
+}
 }

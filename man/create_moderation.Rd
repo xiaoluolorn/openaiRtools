@@ -2,18 +2,48 @@
 % Please edit documentation in R/moderations.R
 \name{create_moderation}
 \alias{create_moderation}
-\title{Create a moderation (convenience function)}
+\title{Check Content for Policy Violations (Convenience Function)}
 \usage{
 create_moderation(input, model = "omni-moderation-latest")
 }
 \arguments{
-\item{input}{Text or texts to moderate}
+\item{input}{\strong{Required.} A character string or list of strings to moderate.
+Example: \code{"Kill all humans"} or \code{list("Hello", "I hate you")}.}
 
-\item{model}{Moderation model}
+\item{model}{Character. Moderation model to use:
+\code{"omni-moderation-latest"} (default, supports images) or
+\code{"text-moderation-latest"}.}
 }
 \value{
-Moderation response
+A list with \verb{$results} — a list of result objects, one per input.
+Each result has:
+\itemize{
+\item \verb{$flagged} — Logical, \code{TRUE} if content violates policy
+\item \verb{$categories} — Named list of boolean flags per category
+\item \verb{$category_scores} — Named list of scores (0–1) per category
+}
 }
 \description{
-Create a moderation (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and calls \code{client$moderations$create()}.
+}
+\details{
+This API is \strong{free} and does not consume tokens. Use it to screen
+user-generated content before passing it to other APIs.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+# Quick single-text check
+result <- create_moderation("I love everyone!")
+cat("Flagged:", result$results[[1]]$flagged) # FALSE
+
+# Screen multiple texts from user input
+texts <- list("normal message", "harmful content example")
+result <- create_moderation(texts)
+for (i in seq_along(result$results)) {
+  cat("Text", i, "flagged:", result$results[[i]]$flagged, "\n")
+}
+}
 }

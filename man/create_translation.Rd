@@ -2,20 +2,35 @@
 % Please edit documentation in R/audio.R
 \name{create_translation}
 \alias{create_translation}
-\title{Create translation (convenience function)}
+\title{Translate Audio to English Text (Convenience Function)}
 \usage{
 create_translation(file, model = "whisper-1", ...)
 }
 \arguments{
-\item{file}{Audio file path}
+\item{file}{Character. \strong{Required.} Path to the local audio file.
+Supported: flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, webm (max 25 MB).}
 
-\item{model}{Model to use}
+\item{model}{Character. Whisper model. Default: \code{"whisper-1"}.}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters passed to
+\link{AudioTranslationsClient}\verb{$create()}, such as \code{prompt},
+\code{response_format}, \code{temperature}.}
 }
 \value{
-Translation response
+A list with \verb{$text} containing the English translation (for default
+JSON format), or a character string for \code{response_format = "text"}.
 }
 \description{
-Create translation (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and calls \code{client$audio$translations$create()}.
+Always produces English output regardless of source language.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+# Translate a Chinese audio file to English
+result <- create_translation("chinese_speech.mp3")
+cat(result$text) # Output is always in English
+}
 }

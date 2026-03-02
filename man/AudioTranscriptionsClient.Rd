@@ -4,9 +4,8 @@
 \alias{AudioTranscriptionsClient}
 \title{Audio Transcriptions Client}
 \description{
-Audio Transcriptions Client
-
-Audio Transcriptions Client
+Transcribes audio files to text using OpenAI's Whisper model.
+Access via \code{client$audio$transcriptions}.
 }
 \section{Methods}{
 \subsection{Public methods}{

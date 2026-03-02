@@ -2,16 +2,25 @@
 % Please edit documentation in R/batch.R
 \name{cancel_batch}
 \alias{cancel_batch}
-\title{Cancel a batch (convenience function)}
+\title{Cancel a Batch Job (Convenience Function)}
 \usage{
 cancel_batch(batch_id)
 }
 \arguments{
-\item{batch_id}{Batch ID}
+\item{batch_id}{Character. \strong{Required.} The batch ID to cancel.}
 }
 \value{
-Cancelled batch
+A batch object with \verb{$status = "cancelling"}.
 }
 \description{
-Cancel a batch (convenience function)
+Shortcut that creates an \link{OpenAI} client from the \code{OPENAI_API_KEY}
+environment variable and cancels a batch job.
+}
+\examples{
+\dontrun{
+Sys.setenv(OPENAI_API_KEY = "sk-xxxxxx")
+
+result <- cancel_batch("batch_abc123")
+cat("Status:", result$status)
+}
 }

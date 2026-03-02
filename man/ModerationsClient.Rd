@@ -4,9 +4,21 @@
 \alias{ModerationsClient}
 \title{Moderations Client}
 \description{
-Client for OpenAI Moderations API.
-Classifies text as potentially harmful.
+Client for the OpenAI Moderations API. Classifies text (and optionally
+images) for potentially harmful content according to OpenAI's usage policies.
+Access via \code{client$moderations}.
 }
+\details{
+The API returns a set of category flags and confidence scores. It is free
+to use and does not count against your token quota.
+}
+\section{Detected categories}{
+
+\code{hate}, \code{hate/threatening}, \code{harassment}, \code{harassment/threatening},
+\code{self-harm}, \code{self-harm/intent}, \code{self-harm/instructions},
+\code{sexual}, \code{sexual/minors}, \code{violence}, \code{violence/graphic}.
+}
+
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
